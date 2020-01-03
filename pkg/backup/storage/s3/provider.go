@@ -22,7 +22,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/pkg/errors"
 
-	"github.com/oracle/mysql-operator/pkg/apis/mysql/v1"
+	"github.com/cuijxin/mysql-operator/pkg/apis/mysql/v1"
 )
 
 // Provider is storage implementation of provider.Interface.

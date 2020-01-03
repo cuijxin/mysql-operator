@@ -21,8 +21,8 @@ import (
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 
-	api "github.com/oracle/mysql-operator/pkg/apis/mysql/v1"
-	"github.com/oracle/mysql-operator/pkg/constants"
+	api "github.com/cuijxin/mysql-operator/pkg/apis/mysql/v1"
+	"github.com/cuijxin/mysql-operator/pkg/constants"
 )
 
 // SelectorForCluster creates a labels.Selector to match a given clusters

@@ -33,7 +33,7 @@ import (
 	clientset "k8s.io/client-go/kubernetes"
 	clientcmd "k8s.io/client-go/tools/clientcmd"
 
-	mysqlclientset "github.com/oracle/mysql-operator/pkg/generated/clientset/versioned"
+	mysqlclientset "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned"
 )
 
 const (

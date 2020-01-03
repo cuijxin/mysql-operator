@@ -32,16 +32,16 @@ import (
 
 	"github.com/golang/glog"
 
-	options "github.com/oracle/mysql-operator/cmd/mysql-operator/app/options"
-	api "github.com/oracle/mysql-operator/pkg/apis/mysql/v1"
-	"github.com/oracle/mysql-operator/pkg/constants"
-	"github.com/oracle/mysql-operator/pkg/controllers/util"
-	mysqlfake "github.com/oracle/mysql-operator/pkg/generated/clientset/versioned/fake"
-	mysqlinformer_factory "github.com/oracle/mysql-operator/pkg/generated/informers/externalversions"
-	mysqlinformer "github.com/oracle/mysql-operator/pkg/generated/informers/externalversions/mysql/v1"
-	"github.com/oracle/mysql-operator/pkg/resources/secrets"
-	statefulsets "github.com/oracle/mysql-operator/pkg/resources/statefulsets"
-	buildversion "github.com/oracle/mysql-operator/pkg/version"
+	options "github.com/cuijxin/mysql-operator/cmd/mysql-operator/app/options"
+	api "github.com/cuijxin/mysql-operator/pkg/apis/mysql/v1"
+	"github.com/cuijxin/mysql-operator/pkg/constants"
+	"github.com/cuijxin/mysql-operator/pkg/controllers/util"
+	mysqlfake "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned/fake"
+	mysqlinformer_factory "github.com/cuijxin/mysql-operator/pkg/generated/informers/externalversions"
+	mysqlinformer "github.com/cuijxin/mysql-operator/pkg/generated/informers/externalversions/mysql/v1"
+	"github.com/cuijxin/mysql-operator/pkg/resources/secrets"
+	statefulsets "github.com/cuijxin/mysql-operator/pkg/resources/statefulsets"
+	buildversion "github.com/cuijxin/mysql-operator/pkg/version"
 )
 
 func mockOperatorConfig() options.MySQLOperatorServer {

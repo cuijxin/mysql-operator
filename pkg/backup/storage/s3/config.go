@@ -17,7 +17,7 @@ package s3
 import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/oracle/mysql-operator/pkg/apis/mysql/v1"
+	"github.com/cuijxin/mysql-operator/pkg/apis/mysql/v1"
 )
 
 // Config holds the credentials required to authenticate with an S3 compliant API.

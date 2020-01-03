@@ -28,7 +28,7 @@ import (
 
 	utilexec "k8s.io/utils/exec"
 
-	"github.com/oracle/mysql-operator/pkg/apis/mysql/v1"
+	"github.com/cuijxin/mysql-operator/pkg/apis/mysql/v1"
 )
 
 const (

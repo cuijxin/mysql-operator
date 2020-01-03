@@ -26,12 +26,12 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	agentopts "github.com/oracle/mysql-operator/cmd/mysql-agent/app/options"
-	operatoropts "github.com/oracle/mysql-operator/cmd/mysql-operator/app/options"
-	api "github.com/oracle/mysql-operator/pkg/apis/mysql/v1"
-	"github.com/oracle/mysql-operator/pkg/constants"
-	"github.com/oracle/mysql-operator/pkg/resources/secrets"
-	"github.com/oracle/mysql-operator/pkg/version"
+	agentopts "github.com/cuijxin/mysql-operator/cmd/mysql-agent/app/options"
+	operatoropts "github.com/cuijxin/mysql-operator/cmd/mysql-operator/app/options"
+	api "github.com/cuijxin/mysql-operator/pkg/apis/mysql/v1"
+	"github.com/cuijxin/mysql-operator/pkg/constants"
+	"github.com/cuijxin/mysql-operator/pkg/resources/secrets"
+	"github.com/cuijxin/mysql-operator/pkg/version"
 )
 
 const (

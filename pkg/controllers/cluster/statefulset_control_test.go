@@ -15,7 +15,7 @@
 package cluster
 
 import (
-	"github.com/oracle/mysql-operator/pkg/controllers/util"
+	"github.com/cuijxin/mysql-operator/pkg/controllers/util"
 	apps "k8s.io/api/apps/v1beta1"
 	kubernetes "k8s.io/client-go/kubernetes"
 )

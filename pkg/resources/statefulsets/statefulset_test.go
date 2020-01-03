@@ -21,8 +21,8 @@ import (
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	options "github.com/oracle/mysql-operator/cmd/mysql-operator/app/options"
-	api "github.com/oracle/mysql-operator/pkg/apis/mysql/v1"
+	options "github.com/cuijxin/mysql-operator/cmd/mysql-operator/app/options"
+	api "github.com/cuijxin/mysql-operator/pkg/apis/mysql/v1"
 )
 
 func mockOperatorConfig() options.MySQLOperatorServer {

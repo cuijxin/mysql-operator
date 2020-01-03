@@ -22,8 +22,8 @@ import (
 
 	"k8s.io/apiserver/pkg/util/logs"
 
-	"github.com/oracle/mysql-operator/test/e2e/framework"
-	"github.com/oracle/mysql-operator/test/e2e/framework/ginkgowrapper"
+	"github.com/cuijxin/mysql-operator/test/e2e/framework"
+	"github.com/cuijxin/mysql-operator/test/e2e/framework/ginkgowrapper"
 )
 
 func TestE2E(t *testing.T) {

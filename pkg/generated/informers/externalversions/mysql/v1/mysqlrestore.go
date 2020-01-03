@@ -19,10 +19,10 @@ package v1
 import (
 	time "time"
 
-	mysql_v1 "github.com/oracle/mysql-operator/pkg/apis/mysql/v1"
-	versioned "github.com/oracle/mysql-operator/pkg/generated/clientset/versioned"
-	internalinterfaces "github.com/oracle/mysql-operator/pkg/generated/informers/externalversions/internalinterfaces"
-	v1 "github.com/oracle/mysql-operator/pkg/generated/listers/mysql/v1"
+	mysql_v1 "github.com/cuijxin/mysql-operator/pkg/apis/mysql/v1"
+	versioned "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned"
+	internalinterfaces "github.com/cuijxin/mysql-operator/pkg/generated/informers/externalversions/internalinterfaces"
+	v1 "github.com/cuijxin/mysql-operator/pkg/generated/listers/mysql/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"

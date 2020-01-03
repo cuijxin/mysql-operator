@@ -22,9 +22,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 	corelisters "k8s.io/client-go/listers/core/v1"
 
-	"github.com/oracle/mysql-operator/pkg/constants"
-	"github.com/oracle/mysql-operator/pkg/controllers/util"
-	"github.com/oracle/mysql-operator/pkg/resources/statefulsets"
+	"github.com/cuijxin/mysql-operator/pkg/constants"
+	"github.com/cuijxin/mysql-operator/pkg/controllers/util"
+	"github.com/cuijxin/mysql-operator/pkg/resources/statefulsets"
 )
 
 // PodControlInterface defines the interface that the

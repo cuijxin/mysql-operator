@@ -17,7 +17,7 @@ package mysqldump
 import (
 	"fmt"
 
-	"github.com/oracle/mysql-operator/pkg/apis/mysql/v1"
+	"github.com/cuijxin/mysql-operator/pkg/apis/mysql/v1"
 )
 
 // Config holds the MySQL credentials required to authenticate with the MySQL database being

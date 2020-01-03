@@ -25,9 +25,9 @@ import (
 
 	"k8s.io/apiserver/pkg/util/logs"
 
-	"github.com/oracle/mysql-operator/cmd/mysql-operator/app"
-	"github.com/oracle/mysql-operator/cmd/mysql-operator/app/options"
-	"github.com/oracle/mysql-operator/pkg/version"
+	"github.com/cuijxin/mysql-operator/cmd/mysql-operator/app"
+	"github.com/cuijxin/mysql-operator/cmd/mysql-operator/app/options"
+	"github.com/cuijxin/mysql-operator/pkg/version"
 )
 
 const (

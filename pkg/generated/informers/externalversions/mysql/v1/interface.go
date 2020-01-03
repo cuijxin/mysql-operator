@@ -17,7 +17,7 @@
 package v1
 
 import (
-	internalinterfaces "github.com/oracle/mysql-operator/pkg/generated/informers/externalversions/internalinterfaces"
+	internalinterfaces "github.com/cuijxin/mysql-operator/pkg/generated/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to all the informers in this group version.

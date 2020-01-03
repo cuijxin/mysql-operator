@@ -15,8 +15,8 @@
 package v1
 
 import (
-	"github.com/oracle/mysql-operator/pkg/constants"
-	"github.com/oracle/mysql-operator/pkg/version"
+	"github.com/cuijxin/mysql-operator/pkg/constants"
+	"github.com/cuijxin/mysql-operator/pkg/version"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 

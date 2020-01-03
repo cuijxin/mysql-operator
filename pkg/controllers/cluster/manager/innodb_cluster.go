@@ -29,9 +29,9 @@ import (
 	retry "k8s.io/client-go/util/retry"
 	utilexec "k8s.io/utils/exec"
 
-	"github.com/oracle/mysql-operator/pkg/cluster"
-	"github.com/oracle/mysql-operator/pkg/cluster/innodb"
-	"github.com/oracle/mysql-operator/pkg/util/mysqlsh"
+	"github.com/cuijxin/mysql-operator/pkg/cluster"
+	"github.com/cuijxin/mysql-operator/pkg/cluster/innodb"
+	"github.com/cuijxin/mysql-operator/pkg/util/mysqlsh"
 )
 
 var errNoClusterFound = errors.New("no cluster found on any of the seed nodes")

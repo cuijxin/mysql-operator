@@ -22,9 +22,9 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/util/retry"
 
-	api "github.com/oracle/mysql-operator/pkg/apis/mysql/v1"
-	mysqlop "github.com/oracle/mysql-operator/pkg/generated/clientset/versioned"
-	listers "github.com/oracle/mysql-operator/pkg/generated/listers/mysql/v1"
+	api "github.com/cuijxin/mysql-operator/pkg/apis/mysql/v1"
+	mysqlop "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned"
+	listers "github.com/cuijxin/mysql-operator/pkg/generated/listers/mysql/v1"
 )
 
 type clusterUpdaterInterface interface {

@@ -20,7 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/oracle/mysql-operator/pkg/cluster"
+	"github.com/cuijxin/mysql-operator/pkg/cluster"
 )
 
 func TestGetReplicationGroupSeeds(t *testing.T) {

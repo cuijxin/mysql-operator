@@ -15,7 +15,7 @@
 package scheme
 
 import (
-	mysqlv1 "github.com/oracle/mysql-operator/pkg/apis/mysql/v1"
+	mysqlv1 "github.com/cuijxin/mysql-operator/pkg/apis/mysql/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

@@ -28,15 +28,15 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 
-	options "github.com/oracle/mysql-operator/cmd/mysql-operator/app/options"
-	backupcontroller "github.com/oracle/mysql-operator/pkg/controllers/backup"
-	backupschedule "github.com/oracle/mysql-operator/pkg/controllers/backup/schedule"
-	cluster "github.com/oracle/mysql-operator/pkg/controllers/cluster"
-	restorecontroller "github.com/oracle/mysql-operator/pkg/controllers/restore"
-	mysqlop "github.com/oracle/mysql-operator/pkg/generated/clientset/versioned"
-	informers "github.com/oracle/mysql-operator/pkg/generated/informers/externalversions"
-	metrics "github.com/oracle/mysql-operator/pkg/util/metrics"
-	signals "github.com/oracle/mysql-operator/pkg/util/signals"
+	options "github.com/cuijxin/mysql-operator/cmd/mysql-operator/app/options"
+	backupcontroller "github.com/cuijxin/mysql-operator/pkg/controllers/backup"
+	backupschedule "github.com/cuijxin/mysql-operator/pkg/controllers/backup/schedule"
+	cluster "github.com/cuijxin/mysql-operator/pkg/controllers/cluster"
+	restorecontroller "github.com/cuijxin/mysql-operator/pkg/controllers/restore"
+	mysqlop "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned"
+	informers "github.com/cuijxin/mysql-operator/pkg/generated/informers/externalversions"
+	metrics "github.com/cuijxin/mysql-operator/pkg/util/metrics"
+	signals "github.com/cuijxin/mysql-operator/pkg/util/signals"
 )
 
 const (

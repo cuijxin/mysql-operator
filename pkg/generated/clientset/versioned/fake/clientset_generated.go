@@ -15,9 +15,9 @@
 package fake
 
 import (
-	clientset "github.com/oracle/mysql-operator/pkg/generated/clientset/versioned"
-	mysqlv1 "github.com/oracle/mysql-operator/pkg/generated/clientset/versioned/typed/mysql/v1"
-	fakemysqlv1 "github.com/oracle/mysql-operator/pkg/generated/clientset/versioned/typed/mysql/v1/fake"
+	clientset "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned"
+	mysqlv1 "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned/typed/mysql/v1"
+	fakemysqlv1 "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned/typed/mysql/v1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"

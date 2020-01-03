@@ -16,7 +16,7 @@ package versioned
 
 import (
 	glog "github.com/golang/glog"
-	mysqlv1 "github.com/oracle/mysql-operator/pkg/generated/clientset/versioned/typed/mysql/v1"
+	mysqlv1 "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned/typed/mysql/v1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"

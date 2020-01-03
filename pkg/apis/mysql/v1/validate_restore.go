@@ -19,7 +19,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/oracle/mysql-operator/pkg/constants"
+	"github.com/cuijxin/mysql-operator/pkg/constants"
 )
 
 func validateRestore(restore *MySQLRestore) field.ErrorList {

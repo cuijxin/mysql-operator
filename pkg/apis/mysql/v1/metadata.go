@@ -14,7 +14,7 @@
 
 package v1
 
-import "github.com/oracle/mysql-operator/pkg/constants"
+import "github.com/cuijxin/mysql-operator/pkg/constants"
 
 // SetOperatorVersionLabel sets the specified operator version label on the label map.
 func SetOperatorVersionLabel(labelMap map[string]string, label string) {

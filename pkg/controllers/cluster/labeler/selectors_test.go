@@ -21,7 +21,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	fake "k8s.io/client-go/kubernetes/fake"
 
-	constants "github.com/oracle/mysql-operator/pkg/constants"
+	constants "github.com/cuijxin/mysql-operator/pkg/constants"
 )
 
 func TestPrimarySelector(t *testing.T) {

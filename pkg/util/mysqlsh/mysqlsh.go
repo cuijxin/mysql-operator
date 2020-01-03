@@ -27,7 +27,7 @@ import (
 
 	utilexec "k8s.io/utils/exec"
 
-	"github.com/oracle/mysql-operator/pkg/cluster/innodb"
+	"github.com/cuijxin/mysql-operator/pkg/cluster/innodb"
 )
 
 // Interface is an injectable interface for running mysqlsh commands.

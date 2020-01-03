@@ -20,8 +20,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/oracle/mysql-operator/pkg/apis/mysql/v1"
-	"github.com/oracle/mysql-operator/pkg/backup/executor/mysqldump"
+	"github.com/cuijxin/mysql-operator/pkg/apis/mysql/v1"
+	"github.com/cuijxin/mysql-operator/pkg/backup/executor/mysqldump"
 )
 
 const (

@@ -19,7 +19,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/oracle/mysql-operator/pkg/version"
+	"github.com/cuijxin/mysql-operator/pkg/version"
 )
 
 func TestEmptyBackupIsInvalid(t *testing.T) {

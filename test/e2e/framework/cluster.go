@@ -30,10 +30,10 @@ import (
 	. "github.com/onsi/ginkgo"
 	"github.com/pkg/errors"
 
-	"github.com/oracle/mysql-operator/pkg/apis/mysql/v1"
-	"github.com/oracle/mysql-operator/pkg/controllers/cluster/labeler"
-	mysqlclientset "github.com/oracle/mysql-operator/pkg/generated/clientset/versioned"
-	"github.com/oracle/mysql-operator/pkg/resources/secrets"
+	"github.com/cuijxin/mysql-operator/pkg/apis/mysql/v1"
+	"github.com/cuijxin/mysql-operator/pkg/controllers/cluster/labeler"
+	mysqlclientset "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned"
+	"github.com/cuijxin/mysql-operator/pkg/resources/secrets"
 )
 
 // TestDBName is the name of database to use when executing test SQL queries.

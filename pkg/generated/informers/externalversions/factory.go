@@ -21,9 +21,9 @@ import (
 	sync "sync"
 	time "time"
 
-	versioned "github.com/oracle/mysql-operator/pkg/generated/clientset/versioned"
-	internalinterfaces "github.com/oracle/mysql-operator/pkg/generated/informers/externalversions/internalinterfaces"
-	mysql "github.com/oracle/mysql-operator/pkg/generated/informers/externalversions/mysql"
+	versioned "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned"
+	internalinterfaces "github.com/cuijxin/mysql-operator/pkg/generated/informers/externalversions/internalinterfaces"
+	mysql "github.com/cuijxin/mysql-operator/pkg/generated/informers/externalversions/mysql"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

@@ -18,7 +18,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	api "github.com/oracle/mysql-operator/pkg/apis/mysql/v1"
+	api "github.com/cuijxin/mysql-operator/pkg/apis/mysql/v1"
 )
 
 type TestMySQLBackup struct {

@@ -38,10 +38,10 @@ import (
 	"github.com/pkg/errors"
 	"github.com/robfig/cron"
 
-	api "github.com/oracle/mysql-operator/pkg/apis/mysql/v1"
-	mysqlop "github.com/oracle/mysql-operator/pkg/generated/clientset/versioned"
-	opinformers "github.com/oracle/mysql-operator/pkg/generated/informers/externalversions/mysql/v1"
-	oplisters "github.com/oracle/mysql-operator/pkg/generated/listers/mysql/v1"
+	api "github.com/cuijxin/mysql-operator/pkg/apis/mysql/v1"
+	mysqlop "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned"
+	opinformers "github.com/cuijxin/mysql-operator/pkg/generated/informers/externalversions/mysql/v1"
+	oplisters "github.com/cuijxin/mysql-operator/pkg/generated/listers/mysql/v1"
 )
 
 const controllerName = "backupschedule-controller"

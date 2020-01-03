@@ -32,11 +32,11 @@ import (
 	cache "k8s.io/client-go/tools/cache"
 	workqueue "k8s.io/client-go/util/workqueue"
 
-	cluster "github.com/oracle/mysql-operator/pkg/cluster"
-	innodb "github.com/oracle/mysql-operator/pkg/cluster/innodb"
-	constants "github.com/oracle/mysql-operator/pkg/constants"
-	clusterctrl "github.com/oracle/mysql-operator/pkg/controllers/cluster"
-	controllerutils "github.com/oracle/mysql-operator/pkg/controllers/util"
+	cluster "github.com/cuijxin/mysql-operator/pkg/cluster"
+	innodb "github.com/cuijxin/mysql-operator/pkg/cluster/innodb"
+	constants "github.com/cuijxin/mysql-operator/pkg/constants"
+	clusterctrl "github.com/cuijxin/mysql-operator/pkg/controllers/cluster"
+	controllerutils "github.com/cuijxin/mysql-operator/pkg/controllers/util"
 )
 
 const controllerAgentName = "innodb-cluster-labeler"

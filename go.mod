@@ -1,4 +1,4 @@
-module github.com/oracle/mysql-operator
+module github.com/cuijxin/mysql-operator
 
 go 1.12
 

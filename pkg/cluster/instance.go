@@ -21,7 +21,7 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/oracle/mysql-operator/pkg/cluster/innodb"
+	"github.com/cuijxin/mysql-operator/pkg/cluster/innodb"
 )
 
 // Instance represents the local MySQL instance.

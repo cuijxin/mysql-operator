@@ -15,7 +15,7 @@
 package cluster
 
 import (
-	"github.com/oracle/mysql-operator/pkg/util/metrics"
+	"github.com/cuijxin/mysql-operator/pkg/util/metrics"
 )
 
 var (

@@ -17,8 +17,8 @@
 package mysql
 
 import (
-	internalinterfaces "github.com/oracle/mysql-operator/pkg/generated/informers/externalversions/internalinterfaces"
-	v1 "github.com/oracle/mysql-operator/pkg/generated/informers/externalversions/mysql/v1"
+	internalinterfaces "github.com/cuijxin/mysql-operator/pkg/generated/informers/externalversions/internalinterfaces"
+	v1 "github.com/cuijxin/mysql-operator/pkg/generated/informers/externalversions/mysql/v1"
 )
 
 // Interface provides access to each of this group's versions.

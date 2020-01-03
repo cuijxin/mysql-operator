@@ -25,9 +25,9 @@ import (
 	"github.com/golang/glog"
 	"github.com/spf13/pflag"
 
-	"github.com/oracle/mysql-operator/cmd/mysql-agent/app"
-	"github.com/oracle/mysql-operator/cmd/mysql-agent/app/options"
-	"github.com/oracle/mysql-operator/pkg/version"
+	"github.com/cuijxin/mysql-operator/cmd/mysql-agent/app"
+	"github.com/cuijxin/mysql-operator/cmd/mysql-agent/app/options"
+	"github.com/cuijxin/mysql-operator/pkg/version"
 )
 
 func main() {

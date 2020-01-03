@@ -30,11 +30,11 @@ import (
 	kubernetes "k8s.io/client-go/kubernetes"
 	utilexec "k8s.io/utils/exec"
 
-	"github.com/oracle/mysql-operator/pkg/cluster"
-	"github.com/oracle/mysql-operator/pkg/cluster/innodb"
-	"github.com/oracle/mysql-operator/pkg/controllers/cluster/labeler"
-	"github.com/oracle/mysql-operator/pkg/util/metrics"
-	"github.com/oracle/mysql-operator/pkg/util/mysqlsh"
+	"github.com/cuijxin/mysql-operator/pkg/cluster"
+	"github.com/cuijxin/mysql-operator/pkg/cluster/innodb"
+	"github.com/cuijxin/mysql-operator/pkg/controllers/cluster/labeler"
+	"github.com/cuijxin/mysql-operator/pkg/util/metrics"
+	"github.com/cuijxin/mysql-operator/pkg/util/mysqlsh"
 )
 
 const pollingIntervalSeconds = 15

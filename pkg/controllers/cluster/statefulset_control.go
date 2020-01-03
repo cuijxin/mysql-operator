@@ -23,9 +23,9 @@ import (
 	kubernetes "k8s.io/client-go/kubernetes"
 	appslisters "k8s.io/client-go/listers/apps/v1beta1"
 
-	"github.com/oracle/mysql-operator/pkg/constants"
-	"github.com/oracle/mysql-operator/pkg/controllers/util"
-	"github.com/oracle/mysql-operator/pkg/resources/statefulsets"
+	"github.com/cuijxin/mysql-operator/pkg/constants"
+	"github.com/cuijxin/mysql-operator/pkg/controllers/util"
+	"github.com/cuijxin/mysql-operator/pkg/resources/statefulsets"
 )
 
 // StatefulSetControlInterface defines the interface that the

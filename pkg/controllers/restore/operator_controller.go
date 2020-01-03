@@ -35,13 +35,13 @@ import (
 	record "k8s.io/client-go/tools/record"
 	workqueue "k8s.io/client-go/util/workqueue"
 
-	api "github.com/oracle/mysql-operator/pkg/apis/mysql/v1"
-	clusterlabeler "github.com/oracle/mysql-operator/pkg/controllers/cluster/labeler"
-	controllerutils "github.com/oracle/mysql-operator/pkg/controllers/util"
-	mysqlv1client "github.com/oracle/mysql-operator/pkg/generated/clientset/versioned/typed/mysql/v1"
-	informers "github.com/oracle/mysql-operator/pkg/generated/informers/externalversions/mysql/v1"
-	listers "github.com/oracle/mysql-operator/pkg/generated/listers/mysql/v1"
-	kubeutil "github.com/oracle/mysql-operator/pkg/util/kube"
+	api "github.com/cuijxin/mysql-operator/pkg/apis/mysql/v1"
+	clusterlabeler "github.com/cuijxin/mysql-operator/pkg/controllers/cluster/labeler"
+	controllerutils "github.com/cuijxin/mysql-operator/pkg/controllers/util"
+	mysqlv1client "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned/typed/mysql/v1"
+	informers "github.com/cuijxin/mysql-operator/pkg/generated/informers/externalversions/mysql/v1"
+	listers "github.com/cuijxin/mysql-operator/pkg/generated/listers/mysql/v1"
+	kubeutil "github.com/cuijxin/mysql-operator/pkg/util/kube"
 )
 
 const controllerAgentName = "operator-restore-controller"

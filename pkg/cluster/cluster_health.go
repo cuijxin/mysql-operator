@@ -21,8 +21,8 @@ import (
 	"github.com/golang/glog"
 	utilexec "k8s.io/utils/exec"
 
-	"github.com/oracle/mysql-operator/pkg/cluster/innodb"
-	"github.com/oracle/mysql-operator/pkg/util/mysqlsh"
+	"github.com/cuijxin/mysql-operator/pkg/cluster/innodb"
+	"github.com/cuijxin/mysql-operator/pkg/util/mysqlsh"
 )
 
 // CheckNodeInCluster checks whether or not the local MySQL instance is a member
