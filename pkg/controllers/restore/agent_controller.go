@@ -266,7 +266,7 @@ func (controller *AgentController) processRestore(key string) error {
 				field.NotFound(fldPath.Child("backupRef").Child("name"), restore.Spec.BackupRef.Name))
 		}
 
-		creds, err = controller.kubeClient.CoreV1().Secrets(ns).Get(backup.Spec.Storage.SecretRef.Name, metav1.GetOptions{})
+		creds, err = controller.kubeClient.CoreV1().Secrets(ns).Get(context.TODO(), backup.Spec.Storage.SecretRef.Name, metav1.GetOptions{})
 		if err != nil {
 			if !apierrors.IsNotFound(err) {
 				return errors.Wrap(err, "getting backup credentials secret")
@@ -286,7 +286,7 @@ func (controller *AgentController) processRestore(key string) error {
 	// recreation).
 	if validationErr != nil {
 		restore.Status.Phase = api.RestorePhaseFailed
-		restore, err = controller.client.MySQLRestores(ns).Update(restore)
+		restore, err = controller.client.MySQLRestores(ns).Update(context.TODO(), restore, metav1.UpdateOptions{})
 		if err != nil {
 			return errors.Wrapf(err, "failed to update (phase=%q)", api.RestorePhaseFailed)
 		}
@@ -308,7 +308,7 @@ func (controller *AgentController) performRestore(restore *api.MySQLRestore, bac
 	started := time.Now()
 	restore.Status.Phase = api.RestorePhaseStarted
 	restore.Status.TimeStarted = metav1.Time{Time: started}
-	restore, err := controller.client.MySQLRestores(restore.Namespace).Update(restore)
+	restore, err := controller.client.MySQLRestores(restore.Namespace).Update(context.TODO(), restore, metav1.UpdateOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "failed to mark MySQLRestore %q as started", kubeutil.NamespaceAndName(restore))
 	}
@@ -323,7 +323,7 @@ func (controller *AgentController) performRestore(restore *api.MySQLRestore, bac
 	runner, err := backuputil.NewConfiguredRunner(backup.Spec.Executor, executor.DefaultCreds(), backup.Spec.Storage, credsMap)
 	if err != nil {
 		restore.Status.Phase = api.RestorePhaseFailed
-		restore, updateErr := controller.client.MySQLRestores(restore.Namespace).Update(restore)
+		restore, updateErr := controller.client.MySQLRestores(restore.Namespace).Update(context.TODO(), restore, metav1.UpdateOptions{})
 		if updateErr != nil {
 			return errors.Wrapf(err, "failed to mark MySQLRestore %q as failed", kubeutil.NamespaceAndName(restore))
 		}
@@ -335,7 +335,7 @@ func (controller *AgentController) performRestore(restore *api.MySQLRestore, bac
 	err = runner.Restore(backup.Status.Outcome.Location)
 	if err != nil {
 		restore.Status.Phase = api.RestorePhaseFailed
-		restore, updateErr := controller.client.MySQLRestores(restore.Namespace).Update(restore)
+		restore, updateErr := controller.client.MySQLRestores(restore.Namespace).Update(context.TODO(), restore, metav1.UpdateOptions{})
 		if updateErr != nil {
 			return errors.Wrapf(err, "failed to mark MySQLRestore %q as failed", kubeutil.NamespaceAndName(restore))
 		}
@@ -348,7 +348,7 @@ func (controller *AgentController) performRestore(restore *api.MySQLRestore, bac
 
 	restore.Status.Phase = api.RestorePhaseComplete
 	restore.Status.TimeCompleted = metav1.Time{Time: finished}
-	restore, err = controller.client.MySQLRestores(restore.Namespace).Update(restore)
+	restore, err = controller.client.MySQLRestores(restore.Namespace).Update(context.TODO(), restore, metav1.UpdateOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "failed to mark MySQLRestore %q as complete", kubeutil.NamespaceAndName(restore))
 	}

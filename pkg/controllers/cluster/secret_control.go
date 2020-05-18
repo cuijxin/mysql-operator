@@ -1,6 +1,8 @@
 package cluster
 
 import (
+	"context"
+
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -32,16 +34,16 @@ func NewRealSecretControl(client kubernetes.Interface) SecretControlInterface {
 func (rsc *realSecretControl) GetForCluster(cluster *api.MySQLCluster) (*v1.Secret, error) {
 	return rsc.client.CoreV1().
 		Secrets(cluster.Namespace).
-		Get(secrets.GetRootPasswordSecretName(cluster), metav1.GetOptions{})
+		Get(context.TODO(), secrets.GetRootPasswordSecretName(cluster), metav1.GetOptions{})
 }
 
 func (rsc *realSecretControl) CreateSecret(s *v1.Secret) error {
-	_, err := rsc.client.CoreV1().Secrets(s.Namespace).Create(s)
+	_, err := rsc.client.CoreV1().Secrets(s.Namespace).Create(context.TODO(), s, metav1.CreateOptions{})
 	return err
 }
 
 func (rsc *realSecretControl) DeleteSecret(s *v1.Secret) error {
-	err := rsc.client.CoreV1().Secrets(s.Namespace).Delete(s.Name, nil)
+	err := rsc.client.CoreV1().Secrets(s.Namespace).Delete(context.TODO(), s.Name, metav1.DeleteOptions{})
 	if apierrors.IsNotFound(err) {
 		return nil
 	}

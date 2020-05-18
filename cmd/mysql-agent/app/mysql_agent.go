@@ -12,7 +12,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/heptiolabs/healthcheck"
 	"github.com/pkg/errors"
-	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	kubeinformers "k8s.io/client-go/informers"
 	kubernetes "k8s.io/client-go/kubernetes"
@@ -87,7 +87,7 @@ func Run(opts *options.MySQLAgentOpts) error {
 	clustermgr.RegisterMetrics()
 	backupcontroller.RegisterMetrics()
 	restorecontroller.RegisterMetrics()
-	http.Handle("/metrics", prometheus.Handler())
+	http.Handle("/metrics", promhttp.Handler())
 	go http.ListenAndServe(metricsEndpoint, nil)
 
 	// Block until local instance successfully initialised.

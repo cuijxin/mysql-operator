@@ -1,6 +1,7 @@
 package cluster
 
 import (
+	"context"
 	"fmt"
 
 	apps "k8s.io/api/apps/v1beta1"
@@ -35,14 +36,14 @@ func NewRealStatefulSetControl(client kubernetes.Interface, statefulSetLister ap
 }
 
 func (rssc *realStatefulSetControl) CreateStatefulSet(ss *apps.StatefulSet) error {
-	_, err := rssc.client.AppsV1beta1().StatefulSets(ss.Namespace).Create(ss)
+	_, err := rssc.client.AppsV1beta1().StatefulSets(ss.Namespace).Create(context.TODO(), ss, metav1.CreateOptions{})
 	return err
 }
 
 func (rssc *realStatefulSetControl) DeleteStatefulSet(ss *apps.StatefulSet) error {
 	policy := metav1.DeletePropagationBackground
-	opts := &metav1.DeleteOptions{PropagationPolicy: &policy}
-	err := rssc.client.AppsV1beta1().StatefulSets(ss.Namespace).Delete(ss.Name, opts)
+	opts := metav1.DeleteOptions{PropagationPolicy: &policy}
+	err := rssc.client.AppsV1beta1().StatefulSets(ss.Namespace).Delete(context.TODO(), ss.Name, opts)
 	if apierrors.IsNotFound(err) {
 		return nil
 	}

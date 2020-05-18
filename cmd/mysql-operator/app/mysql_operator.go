@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/golang/glog"
-	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	kubeinformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
@@ -48,7 +48,7 @@ func Run(s *options.MySQLOperatorServer) error {
 	// Initialise the operator metrics.
 	metrics.RegisterPodName(s.Hostname)
 	cluster.RegisterMetrics()
-	http.Handle("/metrics", prometheus.Handler())
+	http.Handle("/metrics", promhttp.Handler())
 	go http.ListenAndServe(metricsEndpoint, nil)
 
 	ctx, cancelFunc := context.WithCancel(context.Background())

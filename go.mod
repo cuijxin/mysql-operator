@@ -28,7 +28,7 @@ require (
 	k8s.io/client-go v0.18.2
 	k8s.io/code-generator v0.18.2 // indirect
 	k8s.io/gengo v0.0.0-20200428234225-8167cfdcfc14 // indirect
-	k8s.io/kube-openapi v0.0.0-20200427153329-656914f816f9 // indirect
+	// k8s.io/kube-openapi v0.0.0-20200427153329-656914f816f9 // indirect
 	k8s.io/utils v0.0.0-20200414100711-2df71ebbae66
 	sigs.k8s.io/structured-merge-diff v0.0.0-20190525122527-15d366b2352e // indirect
 )

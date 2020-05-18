@@ -1,8 +1,11 @@
 package cluster
 
 import (
+	"context"
+
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	corelisters "k8s.io/client-go/listers/core/v1"
 )
@@ -27,12 +30,12 @@ func NewRealServiceControl(client kubernetes.Interface, serviceLister corelister
 }
 
 func (rsc *realServiceControl) CreateService(s *v1.Service) error {
-	_, err := rsc.client.CoreV1().Services(s.Namespace).Create(s)
+	_, err := rsc.client.CoreV1().Services(s.Namespace).Create(context.TODO(), s, metav1.CreateOptions{})
 	return err
 }
 
 func (rsc *realServiceControl) DeleteService(s *v1.Service) error {
-	err := rsc.client.CoreV1().Services(s.Namespace).Delete(s.Name, nil)
+	err := rsc.client.CoreV1().Services(s.Namespace).Delete(context.TODO(), s.Name, metav1.DeleteOptions{})
 	if apierrors.IsNotFound(err) {
 		return nil
 	}

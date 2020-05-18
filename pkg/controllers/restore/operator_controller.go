@@ -7,6 +7,7 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -266,7 +267,7 @@ func (controller *OperatorController) processRestore(key string) error {
 	// recreation).
 	if validationErr != nil {
 		restore.Status.Phase = api.RestorePhaseFailed
-		restore, err = controller.client.MySQLRestores(ns).Update(restore)
+		restore, err = controller.client.MySQLRestores(ns).Update(context.TODO(), restore, metav1.UpdateOptions{})
 		if err != nil {
 			return errors.Wrapf(err, "failed to update (phase=%q)", api.RestorePhaseFailed)
 		}
@@ -282,7 +283,7 @@ func (controller *OperatorController) processRestore(key string) error {
 	}
 
 	// Update resource.
-	restore, err = controller.client.MySQLRestores(ns).Update(restore)
+	restore, err = controller.client.MySQLRestores(ns).Update(context.TODO(), restore, metav1.UpdateOptions{})
 	if err != nil {
 		return errors.Wrap(err, "failed to update")
 	}

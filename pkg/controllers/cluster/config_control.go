@@ -1,8 +1,11 @@
 package cluster
 
 import (
+	"context"
+
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	corelisters "k8s.io/client-go/listers/core/v1"
 )
@@ -27,12 +30,12 @@ func NewRealConfigMapControl(client kubernetes.Interface, ConfigMapLister coreli
 }
 
 func (rsc *realConfigMapControl) CreateConfigMap(c *v1.ConfigMap) error {
-	_, err := rsc.client.CoreV1().ConfigMaps(c.Namespace).Create(c)
+	_, err := rsc.client.CoreV1().ConfigMaps(c.Namespace).Create(context.TODO(), c, metav1.CreateOptions{})
 	return err
 }
 
 func (rsc *realConfigMapControl) DeleteConfigMap(c *v1.ConfigMap) error {
-	err := rsc.client.CoreV1().ConfigMaps(c.Namespace).Delete(c.Name, nil)
+	err := rsc.client.CoreV1().ConfigMaps(c.Namespace).Delete(context.TODO(), c.Name, metav1.DeleteOptions{})
 	if apierrors.IsNotFound(err) {
 		return nil
 	}

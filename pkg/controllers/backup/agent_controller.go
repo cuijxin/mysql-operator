@@ -243,7 +243,7 @@ func (controller *AgentController) processBackup(key string) error {
 				field.NotFound(fldPath.Child("clusterRef").Child("name"), backup.Spec.ClusterRef.Name))
 		}
 
-		creds, err = controller.kubeClient.CoreV1().Secrets(ns).Get(backup.Spec.Storage.SecretRef.Name, metav1.GetOptions{})
+		creds, err = controller.kubeClient.CoreV1().Secrets(ns).Get(context.TODO(), backup.Spec.Storage.SecretRef.Name, metav1.GetOptions{})
 		if err != nil {
 			if !apierrors.IsNotFound(err) {
 				return errors.Wrap(err, "getting backup credentials secret")
@@ -263,7 +263,7 @@ func (controller *AgentController) processBackup(key string) error {
 	// recreation).
 	if validationErr != nil {
 		backup.Status.Phase = api.BackupPhaseFailed
-		backup, err = controller.client.MySQLBackups(ns).Update(backup)
+		backup, err = controller.client.MySQLBackups(ns).Update(context.TODO(), backup, metav1.UpdateOptions{})
 		if err != nil {
 			return errors.Wrapf(err, "failed to update (phase=%q)", api.BackupPhaseFailed)
 		}
@@ -285,7 +285,7 @@ func (controller *AgentController) performBackup(backup *api.MySQLBackup, creds 
 	started := time.Now()
 	backup.Status.Phase = api.BackupPhaseStarted
 	backup.Status.TimeStarted = metav1.Time{Time: started}
-	backup, err := controller.client.MySQLBackups(backup.Namespace).Update(backup)
+	backup, err := controller.client.MySQLBackups(backup.Namespace).Update(context.TODO(), backup, metav1.UpdateOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "failed to mark MySQLBackup %q as started", kubeutil.NamespaceAndName(backup))
 	}
@@ -300,7 +300,7 @@ func (controller *AgentController) performBackup(backup *api.MySQLBackup, creds 
 	runner, err := backuputil.NewConfiguredRunner(backup.Spec.Executor, executor.DefaultCreds(), backup.Spec.Storage, credsMap)
 	if err != nil {
 		backup.Status.Phase = api.BackupPhaseFailed
-		backup, updateErr := controller.client.MySQLBackups(backup.Namespace).Update(backup)
+		backup, updateErr := controller.client.MySQLBackups(backup.Namespace).Update(context.TODO(), backup, metav1.UpdateOptions{})
 		if updateErr != nil {
 			return errors.Wrapf(err, "failed to mark MySQLBackup %q as failed", kubeutil.NamespaceAndName(backup))
 		}
@@ -312,7 +312,7 @@ func (controller *AgentController) performBackup(backup *api.MySQLBackup, creds 
 	key, err := runner.Backup(fmt.Sprintf("%s-%s", backup.Spec.ClusterRef.Name, backup.Name))
 	if err != nil {
 		backup.Status.Phase = api.BackupPhaseFailed
-		backup, updateErr := controller.client.MySQLBackups(backup.Namespace).Update(backup)
+		backup, updateErr := controller.client.MySQLBackups(backup.Namespace).Update(context.TODO(), backup, metav1.UpdateOptions{})
 		if updateErr != nil {
 			return errors.Wrapf(err, "failed to mark MySQLBackup %q as failed", kubeutil.NamespaceAndName(backup))
 		}
@@ -326,7 +326,7 @@ func (controller *AgentController) performBackup(backup *api.MySQLBackup, creds 
 	backup.Status.Phase = api.BackupPhaseComplete
 	backup.Status.TimeCompleted = metav1.Time{Time: finished}
 	backup.Status.Outcome = api.BackupOutcome{Location: key}
-	backup, err = controller.client.MySQLBackups(backup.Namespace).Update(backup)
+	backup, err = controller.client.MySQLBackups(backup.Namespace).Update(context.TODO(), backup, metav1.UpdateOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "failed to mark MySQLBackup %q as complete", kubeutil.NamespaceAndName(backup))
 	}

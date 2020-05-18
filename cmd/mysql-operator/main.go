@@ -7,12 +7,13 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/spf13/pflag"
-	utilflag "k8s.io/apiserver/pkg/util/flag"
 
-	"k8s.io/apiserver/pkg/util/logs"
+	// "k8s.io/apiserver/pkg/util/logs"
 
 	"github.com/cuijxin/mysql-operator/cmd/mysql-operator/app"
 	"github.com/cuijxin/mysql-operator/cmd/mysql-operator/app/options"
+	"github.com/cuijxin/mysql-operator/pkg/util/flag"
+	"github.com/cuijxin/mysql-operator/pkg/util/logs"
 	"github.com/cuijxin/mysql-operator/pkg/version"
 )
 
@@ -31,7 +32,7 @@ func main() {
 	}
 
 	opts.AddFlags(pflag.CommandLine)
-	pflag.CommandLine.SetNormalizeFunc(utilflag.WordSepNormalizeFunc)
+	pflag.CommandLine.SetNormalizeFunc(flag.WordSepNormalizeFunc)
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 	pflag.Parse()
 	goflag.CommandLine.Parse([]string{})

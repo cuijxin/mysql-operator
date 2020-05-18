@@ -10,6 +10,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	field "k8s.io/apimachinery/pkg/util/validation/field"
 	wait "k8s.io/apimachinery/pkg/util/wait"
 	corev1informers "k8s.io/client-go/informers/core/v1"
@@ -244,7 +245,7 @@ func (controller *OperatorController) processBackup(key string) error {
 	// recreation).
 	if validationErr != nil {
 		backup.Status.Phase = api.BackupPhaseFailed
-		backup, err = controller.client.MySQLBackups(ns).Update(backup)
+		backup, err = controller.client.MySQLBackups(ns).Update(context.TODO(), backup, metav1.UpdateOptions{})
 		if err != nil {
 			return errors.Wrapf(err, "failed to update (phase=%q)", api.BackupPhaseFailed)
 		}
@@ -261,7 +262,7 @@ func (controller *OperatorController) processBackup(key string) error {
 	}
 
 	// Update resource.
-	backup, err = controller.client.MySQLBackups(ns).Update(backup)
+	backup, err = controller.client.MySQLBackups(ns).Update(context.TODO(), backup, metav1.UpdateOptions{})
 	if err != nil {
 		return errors.Wrap(err, "failed to update")
 	}

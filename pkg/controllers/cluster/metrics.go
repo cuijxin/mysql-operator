@@ -15,4 +15,3 @@ func RegisterMetrics() {
 	metrics.RegisterOperatorMetric(clustersCreatedCount)
 	metrics.RegisterOperatorMetric(clustersDeletedCount)
 }
-© 2020 GitHub, Inc.

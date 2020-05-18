@@ -37,7 +37,7 @@ func isDatabaseRunning(ctx context.Context) bool {
 
 func podExists(kubeclient kubernetes.Interface, instance *cluster.Instance) bool {
 	err := wait.ExponentialBackoff(retry.DefaultRetry, func() (bool, error) {
-		_, err := kubeclient.CoreV1().Pods(instance.Namespace).Get(instance.Name(), metav1.GetOptions{})
+		_, err := kubeclient.CoreV1().Pods(instance.Namespace).Get(context.TODO(), instance.Name(), metav1.GetOptions{})
 		if err != nil {
 			if apierrors.IsNotFound(err) {
 				return false, nil

@@ -427,7 +427,7 @@ func (m *MySQLController) syncHandler(key string) error {
 		glog.V(4).Infof("Updating %q: clusterReplicas=%d statefulSetReplicas=%d",
 			cluster.Spec.Replicas, ss.Spec.Replicas)
 		ss = statefulsets.NewForCluster(cluster, m.opConfig.Images, svc.Name)
-		ss, err = m.kubeClient.AppsV1beta1().StatefulSets(cluster.Namespace).Update(ss)
+		ss, err = m.kubeClient.AppsV1beta1().StatefulSets(cluster.Namespace).Update(context.TODO(), ss, metav1.UpdateOptions{})
 		// If an error occurs during Update, we'll requeue the item so we can
 		// attempt processing again later. This could have been caused by a
 		// temporary network failure, or any other transient reason.

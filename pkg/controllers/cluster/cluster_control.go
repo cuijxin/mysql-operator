@@ -1,10 +1,12 @@
 package cluster
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/golang/glog"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/util/retry"
 
@@ -30,7 +32,7 @@ func newClusterUpdater(client mysqlop.Interface, lister listers.MySQLClusterList
 func (csu *clusterUpdater) UpdateClusterStatus(cluster *api.MySQLCluster, status *api.MySQLClusterStatus) error {
 	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		cluster.Status = *status
-		_, updateErr := csu.client.MysqlV1().MySQLClusters(cluster.Namespace).Update(cluster)
+		_, updateErr := csu.client.MysqlV1().MySQLClusters(cluster.Namespace).Update(context.TODO(), cluster, metav1.UpdateOptions{})
 		if updateErr == nil {
 			return nil
 		}
@@ -50,7 +52,7 @@ func (csu *clusterUpdater) UpdateClusterStatus(cluster *api.MySQLCluster, status
 func (csu *clusterUpdater) UpdateClusterLabels(cluster *api.MySQLCluster, lbls labels.Set) error {
 	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		cluster.Labels = labels.Merge(labels.Set(cluster.Labels), lbls)
-		_, updateErr := csu.client.MysqlV1().MySQLClusters(cluster.Namespace).Update(cluster)
+		_, updateErr := csu.client.MysqlV1().MySQLClusters(cluster.Namespace).Update(context.TODO(), cluster, metav1.UpdateOptions{})
 		if updateErr == nil {
 			return nil
 		}
