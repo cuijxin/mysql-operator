@@ -5,11 +5,14 @@ go 1.13
 require (
 	github.com/aws/aws-sdk-go v1.30.29
 	github.com/emicklei/go-restful v2.12.0+incompatible // indirect
+	github.com/ghodss/yaml v0.0.0-20150909031657-73d445a93680
 	github.com/go-openapi/spec v0.19.8 // indirect
 	github.com/go-openapi/swag v0.19.9 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
 	github.com/mailru/easyjson v0.7.1 // indirect
+	github.com/onsi/ginkgo v1.11.0
+	github.com/onsi/gomega v1.7.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.6.0
 	github.com/robfig/cron v1.2.0
