@@ -29,13 +29,13 @@ import (
 
 // FakeMySQLBackupSchedules implements MySQLBackupScheduleInterface
 type FakeMySQLBackupSchedules struct {
-	Fake *FakeMysqlV1
+	Fake *FakeMysql5V1
 	ns   string
 }
 
-var mysqlbackupschedulesResource = schema.GroupVersionResource{Group: "mysql.oracle.com", Version: "v1", Resource: "mysqlbackupschedules"}
+var mysqlbackupschedulesResource = schema.GroupVersionResource{Group: "mysql5.xintelligent.com", Version: "v1", Resource: "mysqlbackupschedules"}
 
-var mysqlbackupschedulesKind = schema.GroupVersionKind{Group: "mysql.oracle.com", Version: "v1", Kind: "MySQLBackupSchedule"}
+var mysqlbackupschedulesKind = schema.GroupVersionKind{Group: "mysql5.xintelligent.com", Version: "v1", Kind: "MySQLBackupSchedule"}
 
 // Get takes name of the mySQLBackupSchedule, and returns the corresponding mySQLBackupSchedule object, and an error if there is any.
 func (c *FakeMySQLBackupSchedules) Get(ctx context.Context, name string, options v1.GetOptions) (result *mysqlv1.MySQLBackupSchedule, err error) {

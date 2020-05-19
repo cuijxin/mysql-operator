@@ -169,9 +169,9 @@ type SharedInformerFactory interface {
 	ForResource(resource schema.GroupVersionResource) (GenericInformer, error)
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
-	Mysql() mysql.Interface
+	Mysql5() mysql.Interface
 }
 
-func (f *sharedInformerFactory) Mysql() mysql.Interface {
+func (f *sharedInformerFactory) Mysql5() mysql.Interface {
 	return mysql.New(f, f.namespace, f.tweakListOptions)
 }

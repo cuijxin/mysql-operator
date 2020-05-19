@@ -1,368 +1,457 @@
 package backupschedule
 
 import (
-	"context"
-	"fmt"
-	"sync"
+	"testing"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/clock"
-	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/client-go/kubernetes"
-	scheme "k8s.io/client-go/kubernetes/scheme"
-	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	"k8s.io/client-go/kubernetes/fake"
+	core "k8s.io/client-go/testing"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
-	"k8s.io/client-go/util/retry"
-	"k8s.io/client-go/util/workqueue"
 
-	"github.com/golang/glog"
-	"github.com/pkg/errors"
 	"github.com/robfig/cron"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	api "github.com/cuijxin/mysql-operator/pkg/apis/mysql/v1"
-	mysqlop "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned"
-	opinformers "github.com/cuijxin/mysql-operator/pkg/generated/informers/externalversions/mysql/v1"
-	oplisters "github.com/cuijxin/mysql-operator/pkg/generated/listers/mysql/v1"
+	constants "github.com/cuijxin/mysql-operator/pkg/constants"
+	"github.com/cuijxin/mysql-operator/pkg/controllers/util"
+	mysqlfake "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned/fake"
+	informers "github.com/cuijxin/mysql-operator/pkg/generated/informers/externalversions"
+	. "github.com/cuijxin/mysql-operator/pkg/util/test"
+	"github.com/cuijxin/mysql-operator/pkg/version"
 )
 
-const controllerName = "backupschedule-controller"
+const maxNumEventsPerTest = 10
 
-const (
-	// CronScheduleValidationError is used as part of the Event 'reason' when a
-	// MySQLBackupSchedule fails validation due to an invalid Cron schedule string.
-	CronScheduleValidationError = "CronScheduleValidationError"
-)
+func TestProcessSchedule(t *testing.T) {
+	mysqlOperatorVersion := version.GetBuildVersion()
 
-// Controller watches the Kubernetes API for changes to MySQLBackupSchedule
-// resources.
-type Controller struct {
-	opClient                   mysqlop.Interface
-	backupScheduleLister       oplisters.MySQLBackupScheduleLister
-	backupScheduleListerSynced cache.InformerSynced
-	syncHandler                func(scheduleName string) error
-	queue                      workqueue.RateLimitingInterface
-	syncPeriod                 time.Duration
-	clock                      clock.Clock
-	namespace                  string
-	recorder                   record.EventRecorder
-}
-
-// NewController creates a new BackupScheduleController.
-func NewController(
-	opClient mysqlop.Interface,
-	kubeClient kubernetes.Interface,
-	backupScheduleInformer opinformers.MySQLBackupScheduleInformer,
-	syncPeriod time.Duration,
-	namespace string,
-) *Controller {
-	glog.V(4).Info("Creating event broadcaster")
-	eventBroadcaster := record.NewBroadcaster()
-	eventBroadcaster.StartLogging(glog.Infof)
-	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: kubeClient.CoreV1().Events("")})
-	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerName})
-
-	c := &Controller{
-		opClient:                   opClient,
-		backupScheduleLister:       backupScheduleInformer.Lister(),
-		backupScheduleListerSynced: backupScheduleInformer.Informer().HasSynced,
-		queue:                      workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "backupschedule"),
-		syncPeriod:                 syncPeriod,
-		clock:                      clock.RealClock{},
-		namespace:                  namespace,
-		recorder:                   recorder,
-	}
-
-	c.syncHandler = c.processSchedule
-
-	backupScheduleInformer.Informer().AddEventHandler(
-		cache.ResourceEventHandlerFuncs{
-			AddFunc: func(obj interface{}) {
-				bs := obj.(*api.MySQLBackupSchedule)
-
-				switch bs.Status.Phase {
-				case "", api.BackupSchedulePhaseNew, api.BackupSchedulePhaseEnabled:
-					// add to work queue
-				default:
-					glog.V(4).Info("Backup schedule is not new, skipping")
-					return
-				}
-
-				key, err := cache.MetaNamespaceKeyFunc(bs)
-				if err != nil {
-					glog.Errorf("Error creating queue key, item not added to queue: %v", err)
-					return
-				}
-				c.queue.Add(key)
-			},
+	tests := []struct {
+		name                             string
+		scheduleKey                      string
+		schedule                         *api.MySQLBackupSchedule
+		fakeClockTime                    string
+		expectedErr                      bool
+		expectedSchedulePhaseUpdate      *api.MySQLBackupSchedule
+		expectedScheduleLastBackupUpdate *api.MySQLBackupSchedule
+		expectedBackupCreate             *api.MySQLBackup
+		expectedEvents                   []string
+	}{
+		{
+			name:           "invalid key returns error",
+			scheduleKey:    "invalid/key/value",
+			expectedErr:    true,
+			expectedEvents: []string{},
 		},
-	)
-
-	return c
-}
-
-// Run is a blocking function that runs the specified number of worker goroutines
-// to process items in the work queue.
-func (controller *Controller) Run(ctx context.Context, numWorkers int) error {
-	var wg sync.WaitGroup
-
-	defer func() {
-		glog.V(4).Info("Waiting for workers to finish their work")
-
-		controller.queue.ShutDown()
-
-		// We have to wait here in the deferred function instead of at the bottom of the function body
-		// because we have to shut down the queue in order for the workers to shut down gracefully, and
-		// we want to shut down the queue via defer and not at the end of the body.
-		wg.Wait()
-
-		glog.Info("All workers have finished")
-	}()
-
-	glog.V(4).Info("Starting backup schedule controller")
-	defer glog.Info("Shutting down backup schedule controller")
-
-	glog.V(2).Info("Waiting for backup schedule controller caches to sync")
-	if !cache.WaitForCacheSync(ctx.Done(), controller.backupScheduleListerSynced) {
-		return errors.New("timed out waiting for backup schedule controller caches to sync")
-	}
-	glog.V(2).Info("Backup schedule controller caches are synced")
-
-	wg.Add(numWorkers)
-	for i := 0; i < numWorkers; i++ {
-		go func() {
-			wait.Until(controller.runWorker, time.Second, ctx.Done())
-			wg.Done()
-		}()
-	}
-
-	go wait.Until(controller.enqueueAllEnabledSchedules, controller.syncPeriod, ctx.Done())
-
-	<-ctx.Done()
-	return nil
-}
-
-func (controller *Controller) enqueueAllEnabledSchedules() {
-	backupSchedules, err := controller.backupScheduleLister.MySQLBackupSchedules(controller.namespace).List(labels.NewSelector())
-	if err != nil {
-		glog.Errorf("Error listing MySQLBackupSchedules: %v", err)
-		return
-	}
-
-	for _, bs := range backupSchedules {
-		if bs.Status.Phase != api.BackupSchedulePhaseEnabled {
-			continue
-		}
-
-		key, err := cache.MetaNamespaceKeyFunc(bs)
-		if err != nil {
-			glog.Errorf("Error creating queue key, item not added to queue: %v", err)
-			continue
-		}
-		controller.queue.Add(key)
-	}
-}
-
-func (controller *Controller) runWorker() {
-	// Continually take items off the queue (waits if it's
-	// empty) until we get a shutdown signal from the queue
-	for controller.processNextWorkItem() {
-	}
-}
-
-func (controller *Controller) processNextWorkItem() bool {
-	key, quit := controller.queue.Get()
-	if quit {
-		return false
-	}
-	// Always call done on this item, since if it fails we'll add
-	// it back with rate-limiting below
-	defer controller.queue.Done(key)
-
-	err := controller.syncHandler(key.(string))
-	if err == nil {
-		// If you had no error, tell the queue to stop tracking history for your key. This will reset
-		// things like failure counts for per-item rate limiting.
-		controller.queue.Forget(key)
-		return true
+		{
+			name:           "missing schedule returns early without an error",
+			scheduleKey:    "foo/bar",
+			expectedErr:    false,
+			expectedEvents: []string{},
+		},
+		{
+			name:           "schedule with phase FailedValidation does not get processed",
+			schedule:       NewTestMySQLBackupSchedule("ns", "name").WithPhase(api.BackupSchedulePhaseFailedValidation).MySQLBackupSchedule,
+			expectedErr:    false,
+			expectedEvents: []string{},
+		},
+		{
+			name:        "schedule with phase New gets validated and failed if invalid",
+			schedule:    NewTestMySQLBackupSchedule("ns", "name").WithPhase(api.BackupSchedulePhaseNew).MySQLBackupSchedule,
+			expectedErr: false,
+			expectedSchedulePhaseUpdate: NewTestMySQLBackupSchedule("ns", "name").
+				WithLabel(constants.MySQLOperatorVersionLabel, mysqlOperatorVersion).
+				WithPhase(api.BackupSchedulePhaseFailedValidation).
+				MySQLBackupSchedule,
+			expectedEvents: []string{"Warning CronScheduleValidationError Schedule must be a non-empty valid Cron expression"},
+		},
+		{
+			name:        "schedule with phase <blank> gets validated and failed if invalid",
+			schedule:    NewTestMySQLBackupSchedule("ns", "name").MySQLBackupSchedule,
+			expectedErr: false,
+			expectedSchedulePhaseUpdate: NewTestMySQLBackupSchedule("ns", "name").
+				WithLabel(constants.MySQLOperatorVersionLabel, mysqlOperatorVersion).
+				WithPhase(api.BackupSchedulePhaseFailedValidation).
+				MySQLBackupSchedule,
+			expectedEvents: []string{"Warning CronScheduleValidationError Schedule must be a non-empty valid Cron expression"},
+		},
+		{
+			name:        "schedule with phase Enabled gets re-validated and failed if invalid",
+			schedule:    NewTestMySQLBackupSchedule("ns", "name").WithPhase(api.BackupSchedulePhaseEnabled).MySQLBackupSchedule,
+			expectedErr: false,
+			expectedSchedulePhaseUpdate: NewTestMySQLBackupSchedule("ns", "name").
+				WithLabel(constants.MySQLOperatorVersionLabel, mysqlOperatorVersion).
+				WithPhase(api.BackupSchedulePhaseFailedValidation).
+				MySQLBackupSchedule,
+			expectedEvents: []string{"Warning CronScheduleValidationError Schedule must be a non-empty valid Cron expression"},
+		},
+		{
+			name:          "schedule with phase New gets validated and triggers a backup",
+			schedule:      NewTestMySQLBackupSchedule("ns", "name").WithPhase(api.BackupSchedulePhaseNew).WithCronSchedule("@every 5m").MySQLBackupSchedule,
+			fakeClockTime: "2017-01-01 12:00:00",
+			expectedErr:   false,
+			expectedSchedulePhaseUpdate: NewTestMySQLBackupSchedule("ns", "name").WithLabel(constants.MySQLOperatorVersionLabel, mysqlOperatorVersion).
+				WithPhase(api.BackupSchedulePhaseEnabled).WithCronSchedule("@every 5m").MySQLBackupSchedule,
+			expectedBackupCreate: NewTestMySQLBackup().WithNamespace("ns").WithName("name-20170101120000").WithLabel("backup-schedule", "name").MySQLBackup,
+			expectedScheduleLastBackupUpdate: NewTestMySQLBackupSchedule("ns", "name").WithLabel(constants.MySQLOperatorVersionLabel, mysqlOperatorVersion).
+				WithPhase(api.BackupSchedulePhaseEnabled).WithCronSchedule("@every 5m").WithLastBackupTime("2017-01-01 12:00:00").MySQLBackupSchedule,
+			expectedEvents: []string{},
+		},
+		{
+			name: "schedule with phase Enabled gets re-validated and triggers a backup if valid",
+			schedule: NewTestMySQLBackupSchedule("ns", "name").WithLabel(constants.MySQLOperatorVersionLabel, mysqlOperatorVersion).
+				WithPhase(api.BackupSchedulePhaseEnabled).WithCronSchedule("@every 5m").MySQLBackupSchedule,
+			fakeClockTime:        "2017-01-01 12:00:00",
+			expectedErr:          false,
+			expectedBackupCreate: NewTestMySQLBackup().WithNamespace("ns").WithName("name-20170101120000").WithLabel("backup-schedule", "name").MySQLBackup,
+			expectedScheduleLastBackupUpdate: NewTestMySQLBackupSchedule("ns", "name").WithLabel(constants.MySQLOperatorVersionLabel, mysqlOperatorVersion).
+				WithPhase(api.BackupSchedulePhaseEnabled).WithCronSchedule("@every 5m").WithLastBackupTime("2017-01-01 12:00:00").MySQLBackupSchedule,
+			expectedEvents: []string{},
+		},
+		{
+			name: "schedule that's already run gets LastBackup updated",
+			schedule: NewTestMySQLBackupSchedule("ns", "name").WithLabel(constants.MySQLOperatorVersionLabel, mysqlOperatorVersion).
+				WithPhase(api.BackupSchedulePhaseEnabled).WithCronSchedule("@every 5m").WithLastBackupTime("2000-01-01 00:00:00").MySQLBackupSchedule,
+			fakeClockTime:        "2017-01-01 12:00:00",
+			expectedErr:          false,
+			expectedBackupCreate: NewTestMySQLBackup().WithNamespace("ns").WithName("name-20170101120000").WithLabel("backup-schedule", "name").MySQLBackup,
+			expectedScheduleLastBackupUpdate: NewTestMySQLBackupSchedule("ns", "name").WithLabel(constants.MySQLOperatorVersionLabel, mysqlOperatorVersion).
+				WithPhase(api.BackupSchedulePhaseEnabled).WithCronSchedule("@every 5m").WithLastBackupTime("2017-01-01 12:00:00").MySQLBackupSchedule,
+			expectedEvents: []string{},
+		},
 	}
 
-	glog.Errorf("Error in syncHandler, re-adding item to queue, key: %v, err: %v", key, err)
-	// we had an error processing the item so add it back
-	// into the queue for re-processing with rate-limiting
-	controller.queue.AddRateLimited(key)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			var (
+				mysqlopclient          = mysqlfake.NewSimpleClientset()
+				mysqlopInformerFactory = informers.NewSharedInformerFactory(mysqlopclient, util.NoResyncPeriodFunc())
+				kubeclient             = fake.NewSimpleClientset()
+			)
 
-	return true
-}
+			c := NewController(
+				mysqlopclient,
+				kubeclient,
+				mysqlopInformerFactory.Mysql5().V1().MySQLBackupSchedules(),
+				time.Duration(0),
+				metav1.NamespaceDefault,
+			)
 
-func (controller *Controller) processSchedule(key string) error {
-	glog.V(6).Infof("Running processSchedule: key: %s", key)
-	ns, name, err := cache.SplitMetaNamespaceKey(key)
-	if err != nil {
-		return errors.Wrap(err, "error splitting queue key")
-	}
+			recorder := record.NewFakeRecorder(maxNumEventsPerTest)
+			c.recorder = recorder
 
-	glog.V(6).Info("Getting backup schedule")
-	bs, err := controller.backupScheduleLister.MySQLBackupSchedules(ns).Get(name)
-	if err != nil {
-		// backup schedule no longer exists
-		if apierrors.IsNotFound(err) {
-			glog.Errorf("Backup schedule not found, err: %v", err)
-			return nil
-		}
-		return errors.Wrap(err, "error getting MySQLBackupSchedule")
-	}
-
-	switch bs.Status.Phase {
-	case "", api.BackupSchedulePhaseNew, api.BackupSchedulePhaseEnabled:
-		// valid phase for processing
-	default:
-		return nil
-	}
-
-	glog.V(6).Info("Cloning backup schedule")
-	// don't modify items in the cache
-	bs = bs.DeepCopy().EnsureDefaults()
-	err = bs.Validate()
-	if err != nil {
-		glog.Errorf("Backup schedule validation failed, err: %v", err)
-		controller.recorder.Event(bs, corev1.EventTypeWarning, "FailedValidation", err.Error())
-		return err
-	}
-
-	// validation - even if the item is Enabled, we can't trust it
-	// so re-validate
-	currentPhase := bs.Status.Phase
-
-	cronSchedule, errs := parseCronSchedule(bs)
-	if len(errs) > 0 {
-		bs.Status.Phase = api.BackupSchedulePhaseFailedValidation
-		for _, err := range errs {
-			controller.recorder.Event(bs, corev1.EventTypeWarning, CronScheduleValidationError, err)
-		}
-	} else {
-		bs.Status.Phase = api.BackupSchedulePhaseEnabled
-	}
-
-	// update status if it's changed
-	if currentPhase != bs.Status.Phase {
-		var updatedBackupSchedule *api.MySQLBackupSchedule
-		err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			updatedBackupSchedule, err = controller.opClient.MysqlV1().MySQLBackupSchedules(ns).Update(bs)
-			if err != nil {
-				return errors.Wrapf(err, "error updating backup schedule phase to %q", bs.Status.Phase)
+			var (
+				testTime time.Time
+				err      error
+			)
+			if test.fakeClockTime != "" {
+				testTime, err = time.Parse("2006-01-02 15:04:05", test.fakeClockTime)
+				require.NoError(t, err, "unable to parse test.fakeClockTime: %v", err)
 			}
-			return nil
+			c.clock = clock.NewFakeClock(testTime)
+
+			if test.schedule != nil {
+				mysqlopInformerFactory.Mysql5().V1().MySQLBackupSchedules().Informer().GetStore().Add(test.schedule)
+
+				// this is necessary so the Update() call returns the appropriate object
+				mysqlopclient.PrependReactor("update", "mysqlbackupschedules", func(action core.Action) (bool, runtime.Object, error) {
+					obj := action.(core.UpdateAction).GetObject()
+					// need to deep copy so we can test the schedule state for each call to update
+					return true, obj.DeepCopyObject(), nil
+				})
+			}
+
+			key := test.scheduleKey
+			if key == "" && test.schedule != nil {
+				key, err = cache.MetaNamespaceKeyFunc(test.schedule)
+				require.NoError(t, err, "error getting key from test.schedule: %v", err)
+			}
+
+			err = c.processSchedule(key)
+
+			assert.Equal(t, test.expectedErr, err != nil, "got error %v", err)
+
+			expectedActions := make([]core.Action, 0)
+
+			if upd := test.expectedSchedulePhaseUpdate; upd != nil {
+				action := core.NewUpdateAction(
+					api.SchemeGroupVersion.WithResource("mysqlbackupschedules"),
+					upd.Namespace,
+					upd)
+				expectedActions = append(expectedActions, action)
+			}
+
+			if created := test.expectedBackupCreate; created != nil {
+				action := core.NewCreateAction(
+					api.SchemeGroupVersion.WithResource("mysqlbackups"),
+					created.Namespace,
+					created)
+				expectedActions = append(expectedActions, action)
+			}
+
+			if upd := test.expectedScheduleLastBackupUpdate; upd != nil {
+				action := core.NewUpdateAction(
+					api.SchemeGroupVersion.WithResource("mysqlbackupschedules"),
+					upd.Namespace,
+					upd)
+				expectedActions = append(expectedActions, action)
+			}
+
+			assert.Equal(t, expectedActions, mysqlopclient.Actions())
+
+			events := []string{}
+			numEvents := len(recorder.Events)
+			for i := 0; i < numEvents; i++ {
+				event := <-recorder.Events
+				events = append(events, event)
+			}
+			assert.Equal(t, test.expectedEvents, events)
 		})
-		if err != nil {
-			return err
-		}
-		bs = updatedBackupSchedule
 	}
-
-	if bs.Status.Phase != api.BackupSchedulePhaseEnabled {
-		return nil
-	}
-
-	// check for the backup schedule being due to run, and submit a Backup if so
-	return controller.submitBackupIfDue(bs, cronSchedule)
 }
 
-func parseCronSchedule(item *api.MySQLBackupSchedule) (cron.Schedule, []string) {
-	var validationErrors []string
-	var schedule cron.Schedule
-
-	// cron.Parse panics if schedule is empty
-	if len(item.Spec.Schedule) == 0 {
-		validationErrors = append(validationErrors, "Schedule must be a non-empty valid Cron expression")
-		return nil, validationErrors
+func TestGetNextRunTime(t *testing.T) {
+	tests := []struct {
+		name                      string
+		schedule                  *api.MySQLBackupSchedule
+		lastRanOffset             string
+		expectedDue               bool
+		expectedNextRunTimeOffset string
+	}{
+		{
+			name:                      "first run",
+			schedule:                  &api.MySQLBackupSchedule{Spec: api.BackupScheduleSpec{Schedule: "@every 5m"}},
+			expectedDue:               true,
+			expectedNextRunTimeOffset: "5m",
+		},
+		{
+			name:                      "just ran",
+			schedule:                  &api.MySQLBackupSchedule{Spec: api.BackupScheduleSpec{Schedule: "@every 5m"}},
+			lastRanOffset:             "0s",
+			expectedDue:               false,
+			expectedNextRunTimeOffset: "5m",
+		},
+		{
+			name:                      "almost but not quite time to run",
+			schedule:                  &api.MySQLBackupSchedule{Spec: api.BackupScheduleSpec{Schedule: "@every 5m"}},
+			lastRanOffset:             "4m59s",
+			expectedDue:               false,
+			expectedNextRunTimeOffset: "5m",
+		},
+		{
+			name:                      "time to run again",
+			schedule:                  &api.MySQLBackupSchedule{Spec: api.BackupScheduleSpec{Schedule: "@every 5m"}},
+			lastRanOffset:             "5m",
+			expectedDue:               true,
+			expectedNextRunTimeOffset: "5m",
+		},
+		{
+			name:                      "several runs missed",
+			schedule:                  &api.MySQLBackupSchedule{Spec: api.BackupScheduleSpec{Schedule: "@every 5m"}},
+			lastRanOffset:             "5h",
+			expectedDue:               true,
+			expectedNextRunTimeOffset: "5m",
+		},
 	}
 
-	// adding a recover() around cron.Parse because it panics on empty string and is possible
-	// that it panics under other scenarios as well.
-	func() {
-		defer func() {
-			if r := recover(); r != nil {
-				glog.Errorf("Panic parsing schedule: %v, r: %v", item.Spec.Schedule, r)
-				validationErrors = append(validationErrors, fmt.Sprintf("invalid schedule: %v", r))
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			cronSchedule, err := cron.Parse(test.schedule.Spec.Schedule)
+			require.NoError(t, err, "unable to parse test.schedule.Spec.Schedule: %v", err)
+
+			testClock := clock.NewFakeClock(time.Now())
+
+			if test.lastRanOffset != "" {
+				offsetDuration, err := time.ParseDuration(test.lastRanOffset)
+				require.NoError(t, err, "unable to parse test.lastRanOffset: %v", err)
+
+				test.schedule.Status.LastBackup = metav1.Time{Time: testClock.Now().Add(-offsetDuration)}
 			}
-		}()
 
-		if res, err := cron.ParseStandard(item.Spec.Schedule); err != nil {
-			glog.Errorf("Error parsing schedule: %v, err: %v", item.Spec.Schedule, err)
-			validationErrors = append(validationErrors, fmt.Sprintf("invalid schedule: %v", err))
-		} else {
-			schedule = res
-		}
-	}()
+			nextRunTimeOffset, err := time.ParseDuration(test.expectedNextRunTimeOffset)
+			if err != nil {
+				panic(err)
+			}
+			expectedNextRunTime := test.schedule.Status.LastBackup.Add(nextRunTimeOffset)
 
-	if len(validationErrors) > 0 {
-		return nil, validationErrors
+			due, nextRunTime := getNextRunTime(test.schedule, cronSchedule, testClock.Now())
+
+			assert.Equal(t, test.expectedDue, due)
+			// ignore diffs of under a second. the cron library does some rounding.
+			assert.WithinDuration(t, expectedNextRunTime, nextRunTime, time.Second)
+		})
 	}
-
-	return schedule, nil
 }
 
-func (controller *Controller) submitBackupIfDue(item *api.MySQLBackupSchedule, cronSchedule cron.Schedule) error {
-	var (
-		now                = controller.clock.Now()
-		isDue, nextRunTime = getNextRunTime(item, cronSchedule, now)
-	)
+func TestParseCronSchedule(t *testing.T) {
+	now := time.Date(2017, 8, 10, 12, 27, 0, 0, time.UTC)
 
-	if !isDue {
-		glog.V(4).Infof("Backup schedule %s[%s] is not due, skipping. nextRunTime: %v", item.Name, item.Spec.Schedule, nextRunTime)
-		return nil
+	// Start with a Schedule with:
+	// - schedule: once a day at 9am
+	// - last backup: 2017-08-10 12:27:00 (just happened)
+	s := &api.MySQLBackupSchedule{
+		Spec: api.BackupScheduleSpec{
+			Schedule: "0 9 * * *",
+		},
+		Status: api.ScheduleStatus{
+			LastBackup: metav1.NewTime(now),
+		},
 	}
 
-	// Don't attempt to "catch up" if there are any missed or failed runs - simply
-	// trigger a Backup if it's time.
-	glog.Infof("Backup schedule %s[%s] is due, submitting Backup", item.Name, item.Spec.Schedule)
-	backup := getBackup(item, now)
-	if _, err := controller.opClient.MysqlV1().MySQLBackups(backup.Namespace).Create(backup); err != nil {
-		return errors.Wrap(err, "error creating MySQLBackup")
-	}
+	c, errs := parseCronSchedule(s)
+	require.Empty(t, errs)
 
-	bs := item.DeepCopy()
+	// make sure we're not due and next backup is tomorrow at 9am
+	due, next := getNextRunTime(s, c, now)
+	assert.False(t, due)
+	assert.Equal(t, time.Date(2017, 8, 11, 9, 0, 0, 0, time.UTC), next)
 
-	bs.Status.LastBackup = metav1.NewTime(now)
+	// advance the clock a couple of hours and make sure nothing has changed
+	now = now.Add(2 * time.Hour)
+	due, next = getNextRunTime(s, c, now)
+	assert.False(t, due)
+	assert.Equal(t, time.Date(2017, 8, 11, 9, 0, 0, 0, time.UTC), next)
 
-	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		if _, err := controller.opClient.MysqlV1().MySQLBackupSchedules(bs.Namespace).Update(bs); err != nil {
-			return errors.Wrapf(err, "error updating backup schedule's LastBackup time to %v", bs.Status.LastBackup)
-		}
-		return nil
-	})
-	if err != nil {
-		return err
-	}
+	// advance clock to 1 minute after due time, make sure due=true
+	now = time.Date(2017, 8, 11, 9, 1, 0, 0, time.UTC)
+	due, next = getNextRunTime(s, c, now)
+	assert.True(t, due)
+	assert.Equal(t, time.Date(2017, 8, 11, 9, 0, 0, 0, time.UTC), next)
 
-	return nil
+	// record backup time
+	s.Status.LastBackup = metav1.NewTime(now)
+
+	// advance clock 1 minute, make sure we're not due and next backup is tomorrow at 9am
+	now = time.Date(2017, 8, 11, 9, 2, 0, 0, time.UTC)
+	due, next = getNextRunTime(s, c, now)
+	assert.False(t, due)
+	assert.Equal(t, time.Date(2017, 8, 12, 9, 0, 0, 0, time.UTC), next)
 }
 
-// getNextRunTime gets the latest run time (if the backup schedule hasn't run
-// yet, this will be the zero value which will trigger an immediate backup).
-func getNextRunTime(bs *api.MySQLBackupSchedule, cronSchedule cron.Schedule, asOf time.Time) (bool, time.Time) {
-	lastBackupTime := bs.Status.LastBackup.Time
-
-	nextRunTime := cronSchedule.Next(lastBackupTime)
-
-	return asOf.After(nextRunTime), nextRunTime
-}
-
-func getBackup(item *api.MySQLBackupSchedule, timestamp time.Time) *api.MySQLBackup {
-	backup := &api.MySQLBackup{
-		Spec: item.Spec.BackupTemplate,
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: item.Namespace,
-			Name:      fmt.Sprintf("%s-%s", item.Name, timestamp.Format("20060102150405")),
-			Labels: map[string]string{
-				"backup-schedule": item.Name,
+func TestGetBackup(t *testing.T) {
+	tests := []struct {
+		name           string
+		schedule       *api.MySQLBackupSchedule
+		testClockTime  string
+		expectedBackup *api.MySQLBackup
+	}{
+		{
+			name: "ensure name is formatted correctly (AM time)",
+			schedule: &api.MySQLBackupSchedule{
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace: "foo",
+					Name:      "bar",
+				},
+				Spec: api.BackupScheduleSpec{
+					BackupTemplate: api.BackupSpec{},
+				},
+			},
+			testClockTime: "2017-07-25 09:15:00",
+			expectedBackup: &api.MySQLBackup{
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace: "foo",
+					Name:      "bar-20170725091500",
+				},
+				Spec: api.BackupSpec{},
+			},
+		},
+		{
+			name: "ensure name is formatted correctly (PM time)",
+			schedule: &api.MySQLBackupSchedule{
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace: "foo",
+					Name:      "bar",
+				},
+				Spec: api.BackupScheduleSpec{
+					BackupTemplate: api.BackupSpec{},
+				},
+			},
+			testClockTime: "2017-07-25 14:15:00",
+			expectedBackup: &api.MySQLBackup{
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace: "foo",
+					Name:      "bar-20170725141500",
+				},
+				Spec: api.BackupSpec{},
+			},
+		},
+		{
+			name: "ensure schedule backup template is copied",
+			schedule: &api.MySQLBackupSchedule{
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace: "foo",
+					Name:      "bar",
+				},
+				Spec: api.BackupScheduleSpec{
+					BackupTemplate: api.BackupSpec{
+						Executor: &api.Executor{
+							Provider:  "mysqldump",
+							Databases: []string{"db1", "db2"},
+						},
+						Storage: &api.Storage{
+							Provider: "s3",
+							SecretRef: &corev1.LocalObjectReference{
+								Name: "backup-storage-creds",
+							},
+							Config: map[string]string{
+								"endpoint": "endpoint",
+								"region":   "region",
+								"bucket":   "bucket",
+							},
+						},
+						ClusterRef: &corev1.LocalObjectReference{
+							Name: "test-cluster",
+						},
+						AgentScheduled: "hostname-1",
+					},
+				},
+			},
+			testClockTime: "2017-07-25 09:15:00",
+			expectedBackup: &api.MySQLBackup{
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace: "foo",
+					Name:      "bar-20170725091500",
+				},
+				Spec: api.BackupSpec{
+					Executor: &api.Executor{
+						Provider:  "mysqldump",
+						Databases: []string{"db1", "db2"},
+					},
+					Storage: &api.Storage{
+						Provider: "s3",
+						SecretRef: &corev1.LocalObjectReference{
+							Name: "backup-storage-creds",
+						},
+						Config: map[string]string{
+							"endpoint": "endpoint",
+							"region":   "region",
+							"bucket":   "bucket",
+						},
+					},
+					ClusterRef: &corev1.LocalObjectReference{
+						Name: "test-cluster",
+					},
+					AgentScheduled: "hostname-1",
+				},
 			},
 		},
 	}
-	return backup
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			testTime, err := time.Parse("2006-01-02 15:04:05", test.testClockTime)
+			require.NoError(t, err, "unable to parse test.testClockTime: %v", err)
+
+			backup := getBackup(test.schedule, clock.NewFakeClock(testTime).Now())
+
+			assert.Equal(t, test.expectedBackup.Namespace, backup.Namespace)
+			assert.Equal(t, test.expectedBackup.Name, backup.Name)
+			assert.Equal(t, test.expectedBackup.Spec, backup.Spec)
+		})
+	}
 }

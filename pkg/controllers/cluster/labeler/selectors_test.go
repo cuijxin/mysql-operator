@@ -1,6 +1,7 @@
 package labeler
 
 import (
+	"context"
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
@@ -49,7 +50,7 @@ func TestPrimarySelector(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			client := fake.NewSimpleClientset(newPodWithLabels(tt.name, tt.labels))
-			pods, err := client.CoreV1().Pods(metav1.NamespaceDefault).List(metav1.ListOptions{
+			pods, err := client.CoreV1().Pods(metav1.NamespaceDefault).List(context.TODO(), metav1.ListOptions{
 				LabelSelector: PrimarySelector(tt.name).String(),
 			})
 			if err != nil {
@@ -101,7 +102,7 @@ func TestSecondarySelector(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			client := fake.NewSimpleClientset(newPodWithLabels(tt.name, tt.labels))
-			pods, err := client.CoreV1().Pods(metav1.NamespaceDefault).List(metav1.ListOptions{
+			pods, err := client.CoreV1().Pods(metav1.NamespaceDefault).List(context.TODO(), metav1.ListOptions{
 				LabelSelector: SecondarySelector(tt.name).String(),
 			})
 			if err != nil {
@@ -153,7 +154,7 @@ func TestNonPrimarySelector(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			client := fake.NewSimpleClientset(newPodWithLabels(tt.name, tt.labels))
-			pods, err := client.CoreV1().Pods(metav1.NamespaceDefault).List(metav1.ListOptions{
+			pods, err := client.CoreV1().Pods(metav1.NamespaceDefault).List(context.TODO(), metav1.ListOptions{
 				LabelSelector: NonPrimarySelector(tt.name).String(),
 			})
 			if err != nil {
@@ -205,7 +206,7 @@ func TestHasRoleSelector(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			client := fake.NewSimpleClientset(newPodWithLabels(tt.name, tt.labels))
-			pods, err := client.CoreV1().Pods(metav1.NamespaceDefault).List(metav1.ListOptions{
+			pods, err := client.CoreV1().Pods(metav1.NamespaceDefault).List(context.TODO(), metav1.ListOptions{
 				LabelSelector: HasRoleSelector(tt.name).String(),
 			})
 			if err != nil {

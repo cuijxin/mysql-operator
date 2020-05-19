@@ -75,7 +75,7 @@ func Run(s *options.MySQLOperatorServer) error {
 		mysqlopClient,
 		kubeClient,
 		serverVersion,
-		operatorInformerFactory.Mysql().V1().MySQLClusters(),
+		operatorInformerFactory.Mysql5().V1().MySQLClusters(),
 		kubeInformerFactory.Apps().V1beta1().StatefulSets(),
 		kubeInformerFactory.Core().V1().Pods(),
 		kubeInformerFactory.Core().V1().Services(),
@@ -91,9 +91,9 @@ func Run(s *options.MySQLOperatorServer) error {
 
 	backupController := backupcontroller.NewOperatorController(
 		kubeClient,
-		mysqlopClient.MysqlV1(),
-		operatorInformerFactory.Mysql().V1().MySQLBackups(),
-		operatorInformerFactory.Mysql().V1().MySQLClusters(),
+		mysqlopClient.Mysql5V1(),
+		operatorInformerFactory.Mysql5().V1().MySQLBackups(),
+		operatorInformerFactory.Mysql5().V1().MySQLClusters(),
 		kubeInformerFactory.Core().V1().Pods(),
 	)
 	wg.Add(1)
@@ -104,10 +104,10 @@ func Run(s *options.MySQLOperatorServer) error {
 
 	restoreController := restorecontroller.NewOperatorController(
 		kubeClient,
-		mysqlopClient.MysqlV1(),
-		operatorInformerFactory.Mysql().V1().MySQLRestores(),
-		operatorInformerFactory.Mysql().V1().MySQLClusters(),
-		operatorInformerFactory.Mysql().V1().MySQLBackups(),
+		mysqlopClient.Mysql5V1(),
+		operatorInformerFactory.Mysql5().V1().MySQLRestores(),
+		operatorInformerFactory.Mysql5().V1().MySQLClusters(),
+		operatorInformerFactory.Mysql5().V1().MySQLBackups(),
 		kubeInformerFactory.Core().V1().Pods(),
 	)
 	wg.Add(1)
@@ -119,7 +119,7 @@ func Run(s *options.MySQLOperatorServer) error {
 	backupScheduleController := backupschedule.NewController(
 		mysqlopClient,
 		kubeClient,
-		operatorInformerFactory.Mysql().V1().MySQLBackupSchedules(),
+		operatorInformerFactory.Mysql5().V1().MySQLBackupSchedules(),
 		30*time.Second,
 		s.Namespace,
 	)
