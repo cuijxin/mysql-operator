@@ -7,7 +7,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/pkg/errors"
 
-	"k8s.io/api/apps/v1beta1"
+	apps "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -16,8 +16,8 @@ import (
 )
 
 // UpdateStatefulSet performs a direct update for the specified StatefulSet.
-func UpdateStatefulSet(kubeClient kubernetes.Interface, newData *v1beta1.StatefulSet) (*v1beta1.StatefulSet, error) {
-	result, err := kubeClient.AppsV1beta1().StatefulSets(newData.Namespace).Update(context.TODO(), newData, metav1.UpdateOptions{})
+func UpdateStatefulSet(kubeClient kubernetes.Interface, newData *apps.StatefulSet) (*apps.StatefulSet, error) {
+	result, err := kubeClient.AppsV1().StatefulSets(newData.Namespace).Update(context.TODO(), newData, metav1.UpdateOptions{})
 	if err != nil {
 		glog.Errorf("Failed to update StatefulSet: %v", err)
 		return nil, err
@@ -27,7 +27,7 @@ func UpdateStatefulSet(kubeClient kubernetes.Interface, newData *v1beta1.Statefu
 }
 
 // PatchStatefulSet performs a direct patch update for the specified StatefulSet.
-func PatchStatefulSet(kubeClient kubernetes.Interface, oldData *v1beta1.StatefulSet, newData *v1beta1.StatefulSet) (*v1beta1.StatefulSet, error) {
+func PatchStatefulSet(kubeClient kubernetes.Interface, oldData *apps.StatefulSet, newData *apps.StatefulSet) (*apps.StatefulSet, error) {
 	originalJSON, err := json.Marshal(oldData)
 	if err != nil {
 		return nil, err
@@ -39,13 +39,13 @@ func PatchStatefulSet(kubeClient kubernetes.Interface, oldData *v1beta1.Stateful
 	}
 
 	patchBytes, err := strategicpatch.CreateTwoWayMergePatch(
-		originalJSON, updatedJSON, v1beta1.StatefulSet{})
+		originalJSON, updatedJSON, apps.StatefulSet{})
 	if err != nil {
 		return nil, err
 	}
 	glog.V(4).Infof("Patching StatefulSet %s/%s: %s", oldData.Name, oldData.ObjectMeta.Namespace, string(patchBytes))
 
-	result, err := kubeClient.AppsV1beta1().StatefulSets(oldData.Namespace).Patch(context.TODO(), oldData.Name, types.StrategicMergePatchType, patchBytes, metav1.PatchOptions{}, "")
+	result, err := kubeClient.AppsV1().StatefulSets(oldData.Namespace).Patch(context.TODO(), oldData.Name, types.StrategicMergePatchType, patchBytes, metav1.PatchOptions{}, "")
 	if err != nil {
 		glog.Errorf("Failed to patch StatefulSet: %v", err)
 		return nil, err

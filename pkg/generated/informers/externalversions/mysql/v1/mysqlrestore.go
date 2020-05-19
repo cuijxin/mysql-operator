@@ -59,13 +59,13 @@ func NewFilteredMySQLRestoreInformer(client versioned.Interface, namespace strin
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.Mysql5V1().MySQLRestores(namespace).List(context.TODO(), options)
+				return client.MysqlV1().MySQLRestores(namespace).List(context.TODO(), options)
 			},
 			WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.Mysql5V1().MySQLRestores(namespace).Watch(context.TODO(), options)
+				return client.MysqlV1().MySQLRestores(namespace).Watch(context.TODO(), options)
 			},
 		},
 		&mysqlv1.MySQLRestore{},

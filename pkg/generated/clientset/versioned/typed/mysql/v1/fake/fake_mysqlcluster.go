@@ -29,13 +29,13 @@ import (
 
 // FakeMySQLClusters implements MySQLClusterInterface
 type FakeMySQLClusters struct {
-	Fake *FakeMysql5V1
+	Fake *FakeMysqlV1
 	ns   string
 }
 
-var mysqlclustersResource = schema.GroupVersionResource{Group: "mysql5.xintelligent.com", Version: "v1", Resource: "mysqlclusters"}
+var mysqlclustersResource = schema.GroupVersionResource{Group: "mysql.oracle.com", Version: "v1", Resource: "mysqlclusters"}
 
-var mysqlclustersKind = schema.GroupVersionKind{Group: "mysql5.xintelligent.com", Version: "v1", Kind: "MySQLCluster"}
+var mysqlclustersKind = schema.GroupVersionKind{Group: "mysql.oracle.com", Version: "v1", Kind: "MySQLCluster"}
 
 // Get takes name of the mySQLCluster, and returns the corresponding mySQLCluster object, and an error if there is any.
 func (c *FakeMySQLClusters) Get(ctx context.Context, name string, options v1.GetOptions) (result *mysqlv1.MySQLCluster, err error) {

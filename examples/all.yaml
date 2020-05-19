@@ -1,0 +1,137 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mysql-operator-release01
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: mysql5clusters.mysql5.xintelligent.com
+spec:
+  group: mysql5.xintelligent.com
+  version: v1
+  scope: Namespaced
+  names:
+    kind: MySQLCluster
+    singular: mysql5cluster
+    plural: mysql5clusters
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: mysql5backups.mysql5.xintelligent.com
+spec:
+  group: mysql5.xintelligent.com
+  version: v1
+  scope: Namespaced
+  names:
+    kind: MySQLBackup
+    singular: mysql5backup
+    plural: mysql5backups
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: mysql5restores.mysql5.xintelligent.com
+spec:
+  group: mysql5.xintelligent.com
+  version: v1
+  scope: Namespaced
+  names:
+    kind: MySQLRestore
+    singular: mysql5restore
+    plural: mysql5restores
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: mysql5backupschedules.mysql5.xintelligent.com
+spec:
+  group: mysql5.xintelligent.com
+  version: v1
+  scope: Namespaced
+  names:
+    kind: MySQLBackupSchedule
+    singular: mysql5backupschedule
+    plural: mysql5backupschedules
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mysql-operator
+  namespace: mysql-operator-release01
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mysql-agent
+  namespace: mysql-operator-release01
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: mysql-operator-release01-cr
+  namespace: mysql-operator-release01
+rules:
+  - apiGroups:
+    - "*"
+    resources:
+    - "*"
+    verbs:
+    - "*"
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: mysql-operator-release01-crb
+  namespace: mysql-operator-release01
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: mysql-operator-release01-cr
+subjects:
+- kind: ServiceAccount
+  name: mysql-operator
+  namespace: mysql-operator-release01
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: mysql-agent-release01-crb
+  namespace: mysql-operator-release01
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: mysql-operator-release01-cr
+subjects:
+- kind: ServiceAccount
+  name: mysql-agent
+  namespace: mysql-operator-release01
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: mysql-operator
+  namespace: mysql-operator-release01
+  labels:
+    app: mysql-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql-operator
+  template:
+    metadata:
+      labels:
+        app: mysql-operator
+    spec:
+      serviceAccountName: mysql-operator
+      containers:
+      - name: mysql-operator-controller
+        image: cuijx/mysql5-operator:v0.18.2
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 10254
+        args:
+          - --v=4
+          - --mysql-agent-image=cuijx/mysql5-agent:v0.18.2

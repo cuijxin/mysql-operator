@@ -18,7 +18,7 @@ package versioned
 import (
 	"fmt"
 
-	mysql5v1 "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned/typed/mysql/v1"
+	mysqlv1 "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned/typed/mysql/v1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"
@@ -26,19 +26,19 @@ import (
 
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
-	Mysql5V1() mysql5v1.Mysql5V1Interface
+	MysqlV1() mysqlv1.MysqlV1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
 // version included in a Clientset.
 type Clientset struct {
 	*discovery.DiscoveryClient
-	mysql5V1 *mysql5v1.Mysql5V1Client
+	mysqlV1 *mysqlv1.MysqlV1Client
 }
 
-// Mysql5V1 retrieves the Mysql5V1Client
-func (c *Clientset) Mysql5V1() mysql5v1.Mysql5V1Interface {
-	return c.mysql5V1
+// MysqlV1 retrieves the MysqlV1Client
+func (c *Clientset) MysqlV1() mysqlv1.MysqlV1Interface {
+	return c.mysqlV1
 }
 
 // Discovery retrieves the DiscoveryClient
@@ -62,7 +62,7 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 	}
 	var cs Clientset
 	var err error
-	cs.mysql5V1, err = mysql5v1.NewForConfig(&configShallowCopy)
+	cs.mysqlV1, err = mysqlv1.NewForConfig(&configShallowCopy)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 // panics if there is an error in the config.
 func NewForConfigOrDie(c *rest.Config) *Clientset {
 	var cs Clientset
-	cs.mysql5V1 = mysql5v1.NewForConfigOrDie(c)
+	cs.mysqlV1 = mysqlv1.NewForConfigOrDie(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClientForConfigOrDie(c)
 	return &cs
@@ -87,7 +87,7 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 // New creates a new Clientset for the given RESTClient.
 func New(c rest.Interface) *Clientset {
 	var cs Clientset
-	cs.mysql5V1 = mysql5v1.New(c)
+	cs.mysqlV1 = mysqlv1.New(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClient(c)
 	return &cs

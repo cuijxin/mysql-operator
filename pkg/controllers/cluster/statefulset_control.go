@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	apps "k8s.io/api/apps/v1beta1"
+	apps "k8s.io/api/apps/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubernetes "k8s.io/client-go/kubernetes"
-	appslisters "k8s.io/client-go/listers/apps/v1beta1"
+	appslisters "k8s.io/client-go/listers/apps/v1"
 
 	"github.com/cuijxin/mysql-operator/pkg/constants"
 	"github.com/cuijxin/mysql-operator/pkg/controllers/util"
@@ -36,14 +36,14 @@ func NewRealStatefulSetControl(client kubernetes.Interface, statefulSetLister ap
 }
 
 func (rssc *realStatefulSetControl) CreateStatefulSet(ss *apps.StatefulSet) error {
-	_, err := rssc.client.AppsV1beta1().StatefulSets(ss.Namespace).Create(context.TODO(), ss, metav1.CreateOptions{})
+	_, err := rssc.client.AppsV1().StatefulSets(ss.Namespace).Create(context.TODO(), ss, metav1.CreateOptions{})
 	return err
 }
 
 func (rssc *realStatefulSetControl) DeleteStatefulSet(ss *apps.StatefulSet) error {
 	policy := metav1.DeletePropagationBackground
 	opts := metav1.DeleteOptions{PropagationPolicy: &policy}
-	err := rssc.client.AppsV1beta1().StatefulSets(ss.Namespace).Delete(context.TODO(), ss.Name, opts)
+	err := rssc.client.AppsV1().StatefulSets(ss.Namespace).Delete(context.TODO(), ss.Name, opts)
 	if apierrors.IsNotFound(err) {
 		return nil
 	}

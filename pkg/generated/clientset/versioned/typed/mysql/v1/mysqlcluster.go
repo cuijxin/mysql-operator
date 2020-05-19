@@ -53,7 +53,7 @@ type mySQLClusters struct {
 }
 
 // newMySQLClusters returns a MySQLClusters
-func newMySQLClusters(c *Mysql5V1Client, namespace string) *mySQLClusters {
+func newMySQLClusters(c *MysqlV1Client, namespace string) *mySQLClusters {
 	return &mySQLClusters{
 		client: c.RESTClient(),
 		ns:     namespace,

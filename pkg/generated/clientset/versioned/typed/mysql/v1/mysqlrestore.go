@@ -53,7 +53,7 @@ type mySQLRestores struct {
 }
 
 // newMySQLRestores returns a MySQLRestores
-func newMySQLRestores(c *Mysql5V1Client, namespace string) *mySQLRestores {
+func newMySQLRestores(c *MysqlV1Client, namespace string) *mySQLRestores {
 	return &mySQLRestores{
 		client: c.RESTClient(),
 		ns:     namespace,

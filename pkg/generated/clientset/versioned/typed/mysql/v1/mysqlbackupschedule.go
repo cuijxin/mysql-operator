@@ -53,7 +53,7 @@ type mySQLBackupSchedules struct {
 }
 
 // newMySQLBackupSchedules returns a MySQLBackupSchedules
-func newMySQLBackupSchedules(c *Mysql5V1Client, namespace string) *mySQLBackupSchedules {
+func newMySQLBackupSchedules(c *MysqlV1Client, namespace string) *mySQLBackupSchedules {
 	return &mySQLBackupSchedules{
 		client: c.RESTClient(),
 		ns:     namespace,

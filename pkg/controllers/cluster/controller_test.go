@@ -6,13 +6,13 @@ import (
 	"testing"
 	"time"
 
-	apps "k8s.io/api/apps/v1beta1"
+	apps "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/informers"
-	appsinformers "k8s.io/client-go/informers/apps/v1beta1"
+	appsinformers "k8s.io/client-go/informers/apps/v1"
 	coreinformers "k8s.io/client-go/informers/core/v1"
 	"k8s.io/client-go/kubernetes/fake"
 	cache "k8s.io/client-go/tools/cache"
@@ -113,7 +113,7 @@ func TestSyncEnsureClusterLabels(t *testing.T) {
 }
 
 func assertOperatorClusterInvariants(t *testing.T, controller *MySQLController, namespace string, name string, version string) {
-	cluster, err := controller.opClient.Mysql5V1().MySQLClusters(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+	cluster, err := controller.opClient.MysqlV1().MySQLClusters(namespace).Get(context.TODO(), name, metav1.GetOptions{})
 	if err != nil {
 		t.Fatalf("Get client MySQLCluster err: %+v", err)
 	}
@@ -227,7 +227,7 @@ func TestSyncEnsureStatefulSet(t *testing.T) {
 
 func assertOperatorStatefulSetInvariants(t *testing.T, controller *MySQLController, cluster *api.MySQLCluster) {
 	kubeClient := controller.kubeClient
-	statefulset, err := kubeClient.AppsV1beta1().StatefulSets(cluster.Namespace).Get(context.TODO(), cluster.Name, metav1.GetOptions{})
+	statefulset, err := kubeClient.AppsV1().StatefulSets(cluster.Namespace).Get(context.TODO(), cluster.Name, metav1.GetOptions{})
 	if err != nil {
 		t.Fatalf("Get client MySQLCluster statefulset error: %+v", err)
 	}
@@ -323,7 +323,7 @@ func assertOperatorVersionInvariants(t *testing.T, controller *MySQLController, 
 	expectedImageVersion := mockOperatorConfig().Images.MySQLAgentImage + ":" + version
 
 	// Check MySQLCluster has the correct operator version
-	updatedCluster, err := controller.opClient.Mysql5V1().MySQLClusters(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+	updatedCluster, err := controller.opClient.MysqlV1().MySQLClusters(namespace).Get(context.TODO(), name, metav1.GetOptions{})
 	if err != nil {
 		t.Fatalf("Get client MySQLCluster err: %+v", err)
 	}
@@ -333,7 +333,7 @@ func assertOperatorVersionInvariants(t *testing.T, controller *MySQLController, 
 	}
 
 	// Check StatefulSets has the correct operator version.
-	updatedStatefulSet, err := controller.kubeClient.AppsV1beta1().StatefulSets(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+	updatedStatefulSet, err := controller.kubeClient.AppsV1().StatefulSets(namespace).Get(context.TODO(), name, metav1.GetOptions{})
 	if err != nil {
 		t.Fatalf("Get client StatefulSet err: %+v", err)
 	}
@@ -394,7 +394,7 @@ func TestMySQLControllerSyncClusterFromScratch(t *testing.T) {
 	assertOperatorServiceInvariants(t, fakeController, cluster)
 	assertOperatorStatefulSetInvariants(t, fakeController, cluster)
 	assertOperatorVersionInvariants(t, fakeController, namespace, name, version)
-	cluster, err := fakeController.opClient.Mysql5V1().MySQLClusters(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+	cluster, err := fakeController.opClient.MysqlV1().MySQLClusters(namespace).Get(context.TODO(), name, metav1.GetOptions{})
 	if err != nil {
 		t.Fatalf("Get client MySQLCluster err: %+v", err)
 	}
@@ -424,7 +424,7 @@ func mockMySQLCluster(operatorVersion string, name string, namespace string, rep
 	cluster := &api.MySQLCluster{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "MySQLCluster",
-			APIVersion: "mysql5.xintelligent.com/v1",
+			APIVersion: "mysql.oracle.com/v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -506,8 +506,8 @@ func newFakeMySQLController(cluster *api.MySQLCluster, kuberesources ...runtime.
 	mysqlopInformerFactory := mysqlinformer_factory.NewSharedInformerFactory(mysqlopClient, util.NoResyncPeriodFunc())
 
 	fakeInformers := &fakeMySQLControllerInformers{
-		clusterInformer:     mysqlopInformerFactory.Mysql5().V1().MySQLClusters(),
-		statefulSetInformer: kubeInformerFactory.Apps().V1beta1().StatefulSets(),
+		clusterInformer:     mysqlopInformerFactory.Mysql().V1().MySQLClusters(),
+		statefulSetInformer: kubeInformerFactory.Apps().V1().StatefulSets(),
 		podInformer:         kubeInformerFactory.Core().V1().Pods(),
 		serviceInformer:     kubeInformerFactory.Core().V1().Services(),
 		configMapInformer:   kubeInformerFactory.Core().V1().ConfigMaps(),

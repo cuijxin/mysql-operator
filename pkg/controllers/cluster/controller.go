@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	apps "k8s.io/api/apps/v1beta1"
+	apps "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -14,12 +14,12 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	wait "k8s.io/apimachinery/pkg/util/wait"
 	version "k8s.io/apimachinery/pkg/version"
-	appsinformers "k8s.io/client-go/informers/apps/v1beta1"
+	appsinformers "k8s.io/client-go/informers/apps/v1"
 	coreinformers "k8s.io/client-go/informers/core/v1"
 	kubernetes "k8s.io/client-go/kubernetes"
 	scheme "k8s.io/client-go/kubernetes/scheme"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	appslisters "k8s.io/client-go/listers/apps/v1beta1"
+	appslisters "k8s.io/client-go/listers/apps/v1"
 	corelisters "k8s.io/client-go/listers/core/v1"
 	cache "k8s.io/client-go/tools/cache"
 	record "k8s.io/client-go/tools/record"
@@ -427,7 +427,7 @@ func (m *MySQLController) syncHandler(key string) error {
 		glog.V(4).Infof("Updating %q: clusterReplicas=%d statefulSetReplicas=%d",
 			cluster.Spec.Replicas, ss.Spec.Replicas)
 		ss = statefulsets.NewForCluster(cluster, m.opConfig.Images, svc.Name)
-		ss, err = m.kubeClient.AppsV1beta1().StatefulSets(cluster.Namespace).Update(context.TODO(), ss, metav1.UpdateOptions{})
+		ss, err = m.kubeClient.AppsV1().StatefulSets(cluster.Namespace).Update(context.TODO(), ss, metav1.UpdateOptions{})
 		// If an error occurs during Update, we'll requeue the item so we can
 		// attempt processing again later. This could have been caused by a
 		// temporary network failure, or any other transient reason.

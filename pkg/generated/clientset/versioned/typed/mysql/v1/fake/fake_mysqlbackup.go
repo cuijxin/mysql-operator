@@ -29,13 +29,13 @@ import (
 
 // FakeMySQLBackups implements MySQLBackupInterface
 type FakeMySQLBackups struct {
-	Fake *FakeMysql5V1
+	Fake *FakeMysqlV1
 	ns   string
 }
 
-var mysqlbackupsResource = schema.GroupVersionResource{Group: "mysql5.xintelligent.com", Version: "v1", Resource: "mysqlbackups"}
+var mysqlbackupsResource = schema.GroupVersionResource{Group: "mysql.oracle.com", Version: "v1", Resource: "mysqlbackups"}
 
-var mysqlbackupsKind = schema.GroupVersionKind{Group: "mysql5.xintelligent.com", Version: "v1", Kind: "MySQLBackup"}
+var mysqlbackupsKind = schema.GroupVersionKind{Group: "mysql.oracle.com", Version: "v1", Kind: "MySQLBackup"}
 
 // Get takes name of the mySQLBackup, and returns the corresponding mySQLBackup object, and an error if there is any.
 func (c *FakeMySQLBackups) Get(ctx context.Context, name string, options v1.GetOptions) (result *mysqlv1.MySQLBackup, err error) {

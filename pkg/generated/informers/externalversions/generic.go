@@ -49,15 +49,15 @@ func (f *genericInformer) Lister() cache.GenericLister {
 // TODO extend this to unknown resources with a client pool
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
-	// Group=mysql5.xintelligent.com, Version=v1
+	// Group=mysql.oracle.com, Version=v1
 	case v1.SchemeGroupVersion.WithResource("mysqlbackups"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Mysql5().V1().MySQLBackups().Informer()}, nil
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Mysql().V1().MySQLBackups().Informer()}, nil
 	case v1.SchemeGroupVersion.WithResource("mysqlbackupschedules"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Mysql5().V1().MySQLBackupSchedules().Informer()}, nil
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Mysql().V1().MySQLBackupSchedules().Informer()}, nil
 	case v1.SchemeGroupVersion.WithResource("mysqlclusters"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Mysql5().V1().MySQLClusters().Informer()}, nil
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Mysql().V1().MySQLClusters().Informer()}, nil
 	case v1.SchemeGroupVersion.WithResource("mysqlrestores"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Mysql5().V1().MySQLRestores().Informer()}, nil
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Mysql().V1().MySQLRestores().Informer()}, nil
 
 	}
 

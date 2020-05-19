@@ -17,8 +17,8 @@ package fake
 
 import (
 	clientset "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned"
-	mysql5v1 "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned/typed/mysql/v1"
-	fakemysql5v1 "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned/typed/mysql/v1/fake"
+	mysqlv1 "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned/typed/mysql/v1"
+	fakemysqlv1 "github.com/cuijxin/mysql-operator/pkg/generated/clientset/versioned/typed/mysql/v1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
@@ -73,7 +73,7 @@ func (c *Clientset) Tracker() testing.ObjectTracker {
 
 var _ clientset.Interface = &Clientset{}
 
-// Mysql5V1 retrieves the Mysql5V1Client
-func (c *Clientset) Mysql5V1() mysql5v1.Mysql5V1Interface {
-	return &fakemysql5v1.FakeMysql5V1{Fake: &c.Fake}
+// MysqlV1 retrieves the MysqlV1Client
+func (c *Clientset) MysqlV1() mysqlv1.MysqlV1Interface {
+	return &fakemysqlv1.FakeMysqlV1{Fake: &c.Fake}
 }

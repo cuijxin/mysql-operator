@@ -53,7 +53,7 @@ type mySQLBackups struct {
 }
 
 // newMySQLBackups returns a MySQLBackups
-func newMySQLBackups(c *Mysql5V1Client, namespace string) *mySQLBackups {
+func newMySQLBackups(c *MysqlV1Client, namespace string) *mySQLBackups {
 	return &mySQLBackups{
 		client: c.RESTClient(),
 		ns:     namespace,

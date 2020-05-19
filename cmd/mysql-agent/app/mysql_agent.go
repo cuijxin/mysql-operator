@@ -102,9 +102,9 @@ func Run(opts *options.MySQLAgentOpts) error {
 
 	backupController := backupcontroller.NewAgentController(
 		kubeclient,
-		mysqlopClient.Mysql5V1(),
-		sharedInformerFactory.Mysql5().V1().MySQLBackups(),
-		sharedInformerFactory.Mysql5().V1().MySQLClusters(),
+		mysqlopClient.MysqlV1(),
+		sharedInformerFactory.Mysql().V1().MySQLBackups(),
+		sharedInformerFactory.Mysql().V1().MySQLClusters(),
 		kubeInformerFactory.Core().V1().Pods(),
 		opts.Hostname,
 	)
@@ -116,10 +116,10 @@ func Run(opts *options.MySQLAgentOpts) error {
 
 	restoreController := restorecontroller.NewAgentController(
 		kubeclient,
-		mysqlopClient.Mysql5V1(),
-		sharedInformerFactory.Mysql5().V1().MySQLRestores(),
-		sharedInformerFactory.Mysql5().V1().MySQLClusters(),
-		sharedInformerFactory.Mysql5().V1().MySQLBackups(),
+		mysqlopClient.MysqlV1(),
+		sharedInformerFactory.Mysql().V1().MySQLRestores(),
+		sharedInformerFactory.Mysql().V1().MySQLClusters(),
+		sharedInformerFactory.Mysql().V1().MySQLBackups(),
 		kubeInformerFactory.Core().V1().Pods(),
 		opts.Hostname,
 	)

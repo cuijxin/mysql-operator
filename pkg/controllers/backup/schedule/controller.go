@@ -252,7 +252,7 @@ func (controller *Controller) processSchedule(key string) error {
 	if currentPhase != bs.Status.Phase {
 		var updatedBackupSchedule *api.MySQLBackupSchedule
 		err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			updatedBackupSchedule, err = controller.opClient.Mysql5V1().MySQLBackupSchedules(ns).Update(context.TODO(), bs, metav1.UpdateOptions{})
+			updatedBackupSchedule, err = controller.opClient.MysqlV1().MySQLBackupSchedules(ns).Update(context.TODO(), bs, metav1.UpdateOptions{})
 			if err != nil {
 				return errors.Wrapf(err, "error updating backup schedule phase to %q", bs.Status.Phase)
 			}
@@ -322,7 +322,7 @@ func (controller *Controller) submitBackupIfDue(item *api.MySQLBackupSchedule, c
 	// trigger a Backup if it's time.
 	glog.Infof("Backup schedule %s[%s] is due, submitting Backup", item.Name, item.Spec.Schedule)
 	backup := getBackup(item, now)
-	if _, err := controller.opClient.Mysql5V1().MySQLBackups(backup.Namespace).Create(context.TODO(), backup, metav1.CreateOptions{}); err != nil {
+	if _, err := controller.opClient.MysqlV1().MySQLBackups(backup.Namespace).Create(context.TODO(), backup, metav1.CreateOptions{}); err != nil {
 		return errors.Wrap(err, "error creating MySQLBackup")
 	}
 
@@ -331,7 +331,7 @@ func (controller *Controller) submitBackupIfDue(item *api.MySQLBackupSchedule, c
 	bs.Status.LastBackup = metav1.NewTime(now)
 
 	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		if _, err := controller.opClient.Mysql5V1().MySQLBackupSchedules(bs.Namespace).Update(context.TODO(), bs, metav1.UpdateOptions{}); err != nil {
+		if _, err := controller.opClient.MysqlV1().MySQLBackupSchedules(bs.Namespace).Update(context.TODO(), bs, metav1.UpdateOptions{}); err != nil {
 			return errors.Wrapf(err, "error updating backup schedule's LastBackup time to %v", bs.Status.LastBackup)
 		}
 		return nil

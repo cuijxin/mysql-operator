@@ -18,7 +18,7 @@ var (
 )
 
 // GroupName is the group name for the MySQL Operator API.
-const GroupName = "mysql5.xintelligent.com"
+const GroupName = "mysql.oracle.com"
 
 // SchemeGroupVersion  is the GroupVersion for the MySQL Operator API.
 var SchemeGroupVersion = schema.GroupVersion{Group: GroupName, Version: "v1"}

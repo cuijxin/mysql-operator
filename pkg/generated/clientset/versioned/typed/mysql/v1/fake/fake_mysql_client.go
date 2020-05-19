@@ -21,29 +21,29 @@ import (
 	testing "k8s.io/client-go/testing"
 )
 
-type FakeMysql5V1 struct {
+type FakeMysqlV1 struct {
 	*testing.Fake
 }
 
-func (c *FakeMysql5V1) MySQLBackups(namespace string) v1.MySQLBackupInterface {
+func (c *FakeMysqlV1) MySQLBackups(namespace string) v1.MySQLBackupInterface {
 	return &FakeMySQLBackups{c, namespace}
 }
 
-func (c *FakeMysql5V1) MySQLBackupSchedules(namespace string) v1.MySQLBackupScheduleInterface {
+func (c *FakeMysqlV1) MySQLBackupSchedules(namespace string) v1.MySQLBackupScheduleInterface {
 	return &FakeMySQLBackupSchedules{c, namespace}
 }
 
-func (c *FakeMysql5V1) MySQLClusters(namespace string) v1.MySQLClusterInterface {
+func (c *FakeMysqlV1) MySQLClusters(namespace string) v1.MySQLClusterInterface {
 	return &FakeMySQLClusters{c, namespace}
 }
 
-func (c *FakeMysql5V1) MySQLRestores(namespace string) v1.MySQLRestoreInterface {
+func (c *FakeMysqlV1) MySQLRestores(namespace string) v1.MySQLRestoreInterface {
 	return &FakeMySQLRestores{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
-func (c *FakeMysql5V1) RESTClient() rest.Interface {
+func (c *FakeMysqlV1) RESTClient() rest.Interface {
 	var ret *rest.RESTClient
 	return ret
 }

@@ -1,6 +1,6 @@
 package mysql
 
 const (
-	GroupName = "mysql5.xintelligent.com"
+	GroupName = "mysql.oracle.com"
 	Version   = "v1"
 )

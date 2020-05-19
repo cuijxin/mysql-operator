@@ -29,13 +29,13 @@ import (
 
 // FakeMySQLRestores implements MySQLRestoreInterface
 type FakeMySQLRestores struct {
-	Fake *FakeMysql5V1
+	Fake *FakeMysqlV1
 	ns   string
 }
 
-var mysqlrestoresResource = schema.GroupVersionResource{Group: "mysql5.xintelligent.com", Version: "v1", Resource: "mysqlrestores"}
+var mysqlrestoresResource = schema.GroupVersionResource{Group: "mysql.oracle.com", Version: "v1", Resource: "mysqlrestores"}
 
-var mysqlrestoresKind = schema.GroupVersionKind{Group: "mysql5.xintelligent.com", Version: "v1", Kind: "MySQLRestore"}
+var mysqlrestoresKind = schema.GroupVersionKind{Group: "mysql.oracle.com", Version: "v1", Kind: "MySQLRestore"}
 
 // Get takes name of the mySQLRestore, and returns the corresponding mySQLRestore object, and an error if there is any.
 func (c *FakeMySQLRestores) Get(ctx context.Context, name string, options v1.GetOptions) (result *mysqlv1.MySQLRestore, err error) {
