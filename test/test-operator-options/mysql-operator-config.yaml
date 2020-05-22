@@ -1,0 +1,3 @@
+kubeconfig: /Users/cjx/.kube/config-tencent
+images:
+  mysqlAgent: cuijx/mysql5-agent

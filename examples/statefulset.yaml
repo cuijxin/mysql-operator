@@ -1,0 +1,166 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  creationTimestamp: "2020-05-20T02:44:43Z"
+  generation: 1
+  labels:
+    v1.mysql.oracle.com/cluster: mysql-cluster-with-3-replicas
+    v1.mysql.oracle.com/version: cjx-20200520104107
+  name: mysql-cluster-with-3-replicas
+  namespace: default
+  ownerReferences:
+  - apiVersion: mysql.oracle.com/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: MySQLCluster
+    name: mysql-cluster-with-3-replicas
+    uid: f92a64d0-71d1-47c3-8ae6-45c4e18a4ad8
+  resourceVersion: "23176429"
+  selfLink: /apis/apps/v1/namespaces/default/statefulsets/mysql-cluster-with-3-replicas
+  uid: 8e84f26d-de19-41c1-ab5d-b593f2799901
+spec:
+  podManagementPolicy: OrderedReady
+  replicas: 3
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      v1.mysql.oracle.com/cluster: mysql-cluster-with-3-replicas
+  serviceName: mysql-cluster-with-3-replicas
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
+      creationTimestamp: null
+      labels:
+        v1.mysql.oracle.com/cluster: mysql-cluster-with-3-replicas
+    spec:
+      containers:
+      - command:
+        - /bin/bash
+        - -ecx
+        - |-
+          # Note: We fiddle with the resolv.conf file in order to ensure that the mysql instances
+                   # can refer to each other using just thier hostnames (e.g. mysql-N), thus do not need
+                   # to qualify their names with the name of the (headless) service (e.g. mysql-N.mysql)
+                   search=$(grep ^search /etc/resolv.conf)
+                   echo "$search mysql-cluster-with-3-replicas.${POD_NAMESPACE}.svc.cluster.local" >> /etc/resolv.conf
+                   # Finds the replica index from the hostname, and uses this to define
+                   # a unique server id for this instance.
+                   index=$(cat /etc/hostname | grep -o '[^-]*$')
+                   /entrypoint.sh --server_id=$(expr 1000 + $index) --user=mysql --datadir=/var/lib/mysql --default-storage-engine=innodb --default-tmp-storage-engine=innodb --internal-tmp-disk-storage-engine=innodb --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_520_ci --core-file --default-password-lifetime=0 --default-time-zone=SYSTEM --explicit-defaults-for-timestamp=ON --performance-schema-consumer-events-transactions-current=ON --performance-schema-consumer-events-transactions-history=ON --innodb-buffer-pool-size=128M --innodb-buffer-pool-instances=4 --innodb-autoinc-lock-mode=2 --innodb-flush-method=O_DIRECT_NO_FSYNC --innodb-open-files=128 --innodb-log-buffer-size=4M --innodb-monitor-enable='%' --innodb-print-all-deadlocks=ON --innodb-undo-log-truncate=ON --innodb-undo-tablespaces=2 --innodb-undo-logs=2 --binlog_checksum=NONE --gtid_mode=ON --enforce_gtid_consistency=ON --log_bin --binlog-format=ROW --log-slave-updates=ON --master-info-repository=TABLE --relay-log-info-repository=TABLE --slave-preserve-commit-order=ON --disabled_storage_engines='MyISAM,BLACKHOLE,FEDERATED,ARCHIVE' --transaction-isolation='READ-COMMITTED' --transaction-write-set-extraction=XXHASH64 --loose-group-replication-ip-whitelist='0.0.0.0/0'
+        env:
+        - name: MYSQL_CLUSTER_NAME
+          value: mysql-cluster-with-3-replicas
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: MYSQL_CLUSTER_SERVICE_NAME
+          value: mysql-cluster-with-3-replicas
+        - name: REPLICATION_GROUP_SEEDS
+          value: mysql-cluster-with-3-replicas-0:13306,mysql-cluster-with-3-replicas-1:13306,mysql-cluster-with-3-replicas-2:13306
+        - name: MYSQL_CLUSTER_MULTI_MASTER
+          value: "false"
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: mysql-cluster-with-3-replicas-root-password
+        - name: MYSQL_ROOT_HOST
+          value: '%'
+        - name: MYSQL_LOG_CONSOLE
+          value: "true"
+        image: mysql/mysql-server:5.7.20-1.1.2
+        imagePullPolicy: IfNotPresent
+        name: mysql
+        ports:
+        - containerPort: 3306
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: mysqlvolume
+          subPath: mysql
+        - mountPath: /var/lib/mysql-agent
+          name: mysqlbackupvolume
+          subPath: mysql
+      - args:
+        - --v=4
+        env:
+        - name: MYSQL_CLUSTER_NAME
+          value: mysql-cluster-with-3-replicas
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: MYSQL_CLUSTER_SERVICE_NAME
+          value: mysql-cluster-with-3-replicas
+        - name: REPLICATION_GROUP_SEEDS
+          value: mysql-cluster-with-3-replicas-0:13306,mysql-cluster-with-3-replicas-1:13306,mysql-cluster-with-3-replicas-2:13306
+        - name: MYSQL_CLUSTER_MULTI_MASTER
+          value: "false"
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: mysql-cluster-with-3-replicas-root-password
+        image: cuijx/mysql5-agent:cjx-20200520104107
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /live
+            port: 10512
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: mysql-agent
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /ready
+            port: 10512
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: mysqlvolume
+          subPath: mysql
+        - mountPath: /var/lib/mysql-agent
+          name: mysqlbackupvolume
+          subPath: mysql
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: mysql-agent
+      serviceAccountName: mysql-agent
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - emptyDir: {}
+        name: mysqlvolume
+      - emptyDir: {}
+        name: mysqlbackupvolume
+  updateStrategy:
+    rollingUpdate:
+      partition: 0
+    type: RollingUpdate
+status:
+  collisionCount: 0
+  currentReplicas: 1
+  currentRevision: mysql-cluster-with-3-replicas-bcdcbc547
+  observedGeneration: 1
+  replicas: 1
+  updateRevision: mysql-cluster-with-3-replicas-bcdcbc547
+  updatedReplicas: 1

@@ -18,7 +18,8 @@ import (
 )
 
 const (
-	configPath      = "/etc/mysql-operator/mysql-operator-config.yaml"
+	// configPath      = "/etc/mysql-operator/mysql-operator-config.yaml"
+	configPath      = "../../test/test-operator-options/mysql-operator-config.yaml"
 	metricsEndpoint = "0.0.0.0:8080"
 )
 

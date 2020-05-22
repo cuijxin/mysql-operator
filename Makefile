@@ -14,16 +14,17 @@
 
 USE_GLOBAL_NAMESPACE ?= false
 
-ifdef WERCKER
-    # Insert swear words about mysql group replication and hostname length. Arghh..
-    VERSION ?= ${WERCKER_GIT_COMMIT}
-    TENANT := "oracle"
-else
-    NEW_NAMESPACE ?= e2e-${USER}
-    VERSION := ${USER}-$(shell date +%Y%m%d%H%M%S)
-    TENANT := "spinnaker"
-endif
+# ifdef WERCKER
+#     # Insert swear words about mysql group replication and hostname length. Arghh..
+#     VERSION ?= ${WERCKER_GIT_COMMIT}
+#     TENANT := "oracle"
+# else
+#     NEW_NAMESPACE ?= e2e-${USER}
+#     VERSION := ${USER}-$(shell date +%Y%m%d%H%M%S)
+#     TENANT := "spinnaker"
+# endif
 
+VERSION := v0.18.2
 ROOT_DIR        := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 PKG             := github.com/cuijxin/mysql-operator
 REGISTRY        := cuijx

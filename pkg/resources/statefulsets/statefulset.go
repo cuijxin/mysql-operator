@@ -242,6 +242,7 @@ func mysqlServerContainer(cluster *api.MySQLCluster, mysqlServerImage string, ro
 
 func mysqlAgentContainer(cluster *api.MySQLCluster, mysqlAgentImage string, rootPassword v1.EnvVar, serviceName string, replicas int) v1.Container {
 	agentVersion := version.GetBuildVersion()
+
 	if version := os.Getenv("MYSQL_AGENT_VERSION"); version != "" {
 		agentVersion = version
 	}
@@ -339,6 +340,9 @@ func NewForCluster(cluster *api.MySQLCluster, images operatoropts.Images, servic
 			},
 		},
 		Spec: apps.StatefulSetSpec{
+			Selector: &metav1.LabelSelector{
+				MatchLabels: podLabels,
+			},
 			Replicas: &cluster.Spec.Replicas,
 			Template: v1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
