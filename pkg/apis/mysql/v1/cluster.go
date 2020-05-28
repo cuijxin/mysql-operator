@@ -37,6 +37,9 @@ type MySQLClusterSpec struct {
 	// Replicas defines the number of running MySQL instances in a cluster
 	Replicas int32 `json:"replicas,omitempty"`
 
+	// InitDBName defines the init database name of running MySQL instances in a cluster
+	InitDBName *string `json:"dbName,omitempty"`
+
 	// MultiMaster defines the mode of the MySQL cluster. If set to true,
 	// all instances will be R/W. If false (the default), only a single instance
 	// will be R/W and the rest will be R/O.
