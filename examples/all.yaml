@@ -1,131 +1,215 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: mysql-operator-release01
----
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: mysql5clusters.mysql5.xintelligent.com
+  name: mysql5clusters.mysql.oracle.com
 spec:
-  group: mysql5.xintelligent.com
+  group: mysql.oracle.com
   version: v1
   scope: Namespaced
   names:
     kind: MySQLCluster
-    singular: mysql5cluster
-    plural: mysql5clusters
+    singular: mysqlcluster
+    plural: mysqlclusters
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: mysql5backups.mysql5.xintelligent.com
+  name: mysql5backups.mysql.oracle.com
 spec:
-  group: mysql5.xintelligent.com
+  group: mysql.oracle.com
   version: v1
   scope: Namespaced
   names:
     kind: MySQLBackup
-    singular: mysql5backup
-    plural: mysql5backups
+    singular: mysqlbackup
+    plural: mysqlbackups
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: mysql5restores.mysql5.xintelligent.com
+  name: mysql5restores.mysql.oracle.com
 spec:
-  group: mysql5.xintelligent.com
+  group: mysql.oracle.com
   version: v1
   scope: Namespaced
   names:
     kind: MySQLRestore
-    singular: mysql5restore
-    plural: mysql5restores
+    singular: mysqlrestore
+    plural: mysqlrestores
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: mysql5backupschedules.mysql5.xintelligent.com
+  name: mysql5backupschedules.mysql.oracle.com
 spec:
-  group: mysql5.xintelligent.com
+  group: mysql.oracle.com
   version: v1
   scope: Namespaced
   names:
     kind: MySQLBackupSchedule
-    singular: mysql5backupschedule
-    plural: mysql5backupschedules
+    singular: mysqlbackupschedule
+    plural: mysqlbackupschedules
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: mysql-operator
-  namespace: mysql-operator-release01
+  name: mysql5-operator
+  namespace: mysql5-operator
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: mysql-agent
-  namespace: mysql-operator-release01
+  name: mysql5-agent
+  namespace: mysql5-operator
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  name: mysql-operator-release01-cr
-  namespace: mysql-operator-release01
+  name: mysql5-operator
 rules:
-  - apiGroups:
-    - "*"
-    resources:
-    - "*"
+  - apiGroups: [""]
+    resources: ["pods"]
     verbs:
-    - "*"
+    - get
+    - list
+    - patch
+    - update
+    - watch
+
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs:
+      - get
+      - create
+
+  - apiGroups: [""]
+    resources:
+    - services
+    - configmaps
+    verbs:
+    - create
+    - get
+    - list
+    - watch
+
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs:
+    - create
+    - update
+    - patch
+
+  - apiGroups: ["apps"]
+    resources: ["statefulsets"]
+    verbs:
+    - create
+    - get
+    - list
+    - patch
+    - update
+    - watch
+
+  - apiGroups: ["mysql.oracle.com"]
+    resources:
+    - mysqlbackups
+    - mysqlbackupschedules
+    - mysqlclusters
+    - mysqlclusters/finalizers
+    - mysqlrestores
+    verbs:
+    - get
+    - list
+    - patch
+    - update
+    - watch
+
+  - apiGroups: ["mysql.oracle.com"]
+    resources: ["mysqlbackups"]
+    verbs: ["create"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
+kind: ClusterRole
 metadata:
-  name: mysql-operator-release01-crb
-  namespace: mysql-operator-release01
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: mysql-operator-release01-cr
-subjects:
-- kind: ServiceAccount
-  name: mysql-operator
-  namespace: mysql-operator-release01
+  name: mysql5-agent
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs:
+    - get
+    - list
+    - patch
+    - update
+    - watch
+
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get"]
+
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs:
+    - create
+    - update
+    - patch
+
+  - apiGroups: ["mysql.oracle.com"]
+    resources:
+    - mysqlbackups
+    - mysqlbackupschedules
+    - mysqlclusters
+    - mysqlclusters/finalizers
+    - mysqlrestores
+    verbs:
+    - get
+    - list
+    - patch
+    - update
+    - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
+kind:  ClusterRoleBinding
 metadata:
-  name: mysql-agent-release01-crb
-  namespace: mysql-operator-release01
+  name: mysql5-operator
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: mysql-operator-release01-cr
+  kind:  ClusterRole
+  name: mysql5-operator
 subjects:
 - kind: ServiceAccount
-  name: mysql-agent
-  namespace: mysql-operator-release01
+  name: mysql5-operator
+  namespace: mysql5-operator
 ---
-apiVersion: apps/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind:  ClusterRoleBinding
+metadata:
+  name: mysql5-agent
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind:  ClusterRole
+  name: mysql5-agent
+subjects:
+- kind: ServiceAccount
+  name: mysql5-agent
+  namespace: mysql5-operator
+---
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mysql-operator
-  namespace: mysql-operator-release01
+  name: mysql5-operator
+  namespace: mysql5-operator
   labels:
-    app: mysql-operator
+    app: mysql5-operator
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mysql-operator
+      app: mysql5-operator
   template:
     metadata:
       labels:
-        app: mysql-operator
+        app: mysql5-operator
     spec:
-      serviceAccountName: mysql-operator
+      serviceAccountName: mysql5-operator
       containers:
       - name: mysql-operator-controller
         image: cuijx/mysql5-operator:v0.18.2
