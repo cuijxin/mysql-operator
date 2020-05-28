@@ -15,6 +15,7 @@ require (
 	github.com/go-openapi/jsonreference v0.0.0-20160704190145-13c6e3589ad9
 	github.com/go-openapi/spec v0.0.0-20160808142527-6aced65f8501
 	github.com/go-openapi/swag v0.0.0-20160704191624-1d0bd113de87
+	github.com/go-sql-driver/mysql v1.5.0 // indirect
 	github.com/gogo/protobuf v1.2.2-0.20190723190241-65acae22fc9d
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/golang/groupcache v0.0.0-20171101203131-84a468cf14b4
@@ -23,6 +24,7 @@ require (
 	github.com/google/gofuzz v1.0.0
 	github.com/googleapis/gnostic v0.0.0-20170729233727-0c5108395e2d
 	github.com/gregjones/httpcache v0.0.0-20170920190843-316c5e0ff04e
+	github.com/gucumber/gucumber v0.0.0-20180127021336-7d5c79e832a2 // indirect
 	github.com/hashicorp/golang-lru v0.5.1
 	github.com/heptiolabs/healthcheck v0.0.0-20171103213001-9926c14869d1
 	github.com/howeyc/gopass v0.0.0-20170109162249-bf9dde6d0d2c
@@ -44,6 +46,7 @@ require (
 	github.com/prometheus/common v0.0.0-20171117163051-2e54d0b93cba
 	github.com/prometheus/procfs v0.0.0-20171017214025-a6e9df898b13
 	github.com/robfig/cron v0.0.0-20170309132418-df38d32658d8
+	github.com/shiena/ansicolor v0.0.0-20151119151921-a422bbe96644 // indirect
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.4.0
 	golang.org/x/crypto v0.0.0-20191227163750-53104e6ec876 // indirect
