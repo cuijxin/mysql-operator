@@ -212,10 +212,10 @@ spec:
       serviceAccountName: mysql5-operator
       containers:
       - name: mysql-operator-controller
-        image: cuijx/mysql5-operator:v0.18.2
+        image: cuijx/mysql5-operator:v0.18.2.1
         imagePullPolicy: Always
         ports:
         - containerPort: 10254
         args:
           - --v=4
-          - --mysql-agent-image=cuijx/mysql5-agent:v0.18.2
+          - --mysql-agent-image=cuijx/mysql5-agent

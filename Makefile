@@ -24,7 +24,7 @@ USE_GLOBAL_NAMESPACE ?= false
 #     TENANT := "spinnaker"
 # endif
 
-VERSION := v0.18.2
+VERSION := v0.18.2.1
 ROOT_DIR        := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 PKG             := github.com/cuijxin/mysql-operator
 REGISTRY        := cuijx
