@@ -65,7 +65,7 @@ func (c *mySQLRestores) Get(ctx context.Context, name string, options metav1.Get
 	result = &v1.MySQLRestore{}
 	err = c.client.Get().
 		Namespace(c.ns).
-		Resource("mysqlrestores").
+		Resource("mysql5restores").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
 		Do(ctx).
@@ -82,7 +82,7 @@ func (c *mySQLRestores) List(ctx context.Context, opts metav1.ListOptions) (resu
 	result = &v1.MySQLRestoreList{}
 	err = c.client.Get().
 		Namespace(c.ns).
-		Resource("mysqlrestores").
+		Resource("mysql5restores").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
 		Do(ctx).
@@ -99,7 +99,7 @@ func (c *mySQLRestores) Watch(ctx context.Context, opts metav1.ListOptions) (wat
 	opts.Watch = true
 	return c.client.Get().
 		Namespace(c.ns).
-		Resource("mysqlrestores").
+		Resource("mysql5restores").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
 		Watch(ctx)
@@ -110,7 +110,7 @@ func (c *mySQLRestores) Create(ctx context.Context, mySQLRestore *v1.MySQLRestor
 	result = &v1.MySQLRestore{}
 	err = c.client.Post().
 		Namespace(c.ns).
-		Resource("mysqlrestores").
+		Resource("mysql5restores").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(mySQLRestore).
 		Do(ctx).
@@ -123,7 +123,7 @@ func (c *mySQLRestores) Update(ctx context.Context, mySQLRestore *v1.MySQLRestor
 	result = &v1.MySQLRestore{}
 	err = c.client.Put().
 		Namespace(c.ns).
-		Resource("mysqlrestores").
+		Resource("mysql5restores").
 		Name(mySQLRestore.Name).
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(mySQLRestore).
@@ -136,7 +136,7 @@ func (c *mySQLRestores) Update(ctx context.Context, mySQLRestore *v1.MySQLRestor
 func (c *mySQLRestores) Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error {
 	return c.client.Delete().
 		Namespace(c.ns).
-		Resource("mysqlrestores").
+		Resource("mysql5restores").
 		Name(name).
 		Body(&opts).
 		Do(ctx).
@@ -151,7 +151,7 @@ func (c *mySQLRestores) DeleteCollection(ctx context.Context, opts metav1.Delete
 	}
 	return c.client.Delete().
 		Namespace(c.ns).
-		Resource("mysqlrestores").
+		Resource("mysql5restores").
 		VersionedParams(&listOpts, scheme.ParameterCodec).
 		Timeout(timeout).
 		Body(&opts).
@@ -164,7 +164,7 @@ func (c *mySQLRestores) Patch(ctx context.Context, name string, pt types.PatchTy
 	result = &v1.MySQLRestore{}
 	err = c.client.Patch(pt).
 		Namespace(c.ns).
-		Resource("mysqlrestores").
+		Resource("mysql5restores").
 		Name(name).
 		SubResource(subresources...).
 		VersionedParams(&opts, scheme.ParameterCodec).

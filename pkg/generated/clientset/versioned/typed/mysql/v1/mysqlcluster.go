@@ -65,7 +65,7 @@ func (c *mySQLClusters) Get(ctx context.Context, name string, options metav1.Get
 	result = &v1.MySQLCluster{}
 	err = c.client.Get().
 		Namespace(c.ns).
-		Resource("mysqlclusters").
+		Resource("mysql5clusters").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
 		Do(ctx).
@@ -82,7 +82,7 @@ func (c *mySQLClusters) List(ctx context.Context, opts metav1.ListOptions) (resu
 	result = &v1.MySQLClusterList{}
 	err = c.client.Get().
 		Namespace(c.ns).
-		Resource("mysqlclusters").
+		Resource("mysql5clusters").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
 		Do(ctx).
@@ -99,7 +99,7 @@ func (c *mySQLClusters) Watch(ctx context.Context, opts metav1.ListOptions) (wat
 	opts.Watch = true
 	return c.client.Get().
 		Namespace(c.ns).
-		Resource("mysqlclusters").
+		Resource("mysql5clusters").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
 		Watch(ctx)
@@ -110,7 +110,7 @@ func (c *mySQLClusters) Create(ctx context.Context, mySQLCluster *v1.MySQLCluste
 	result = &v1.MySQLCluster{}
 	err = c.client.Post().
 		Namespace(c.ns).
-		Resource("mysqlclusters").
+		Resource("mysql5clusters").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(mySQLCluster).
 		Do(ctx).
@@ -123,7 +123,7 @@ func (c *mySQLClusters) Update(ctx context.Context, mySQLCluster *v1.MySQLCluste
 	result = &v1.MySQLCluster{}
 	err = c.client.Put().
 		Namespace(c.ns).
-		Resource("mysqlclusters").
+		Resource("mysql5clusters").
 		Name(mySQLCluster.Name).
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(mySQLCluster).
@@ -136,7 +136,7 @@ func (c *mySQLClusters) Update(ctx context.Context, mySQLCluster *v1.MySQLCluste
 func (c *mySQLClusters) Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error {
 	return c.client.Delete().
 		Namespace(c.ns).
-		Resource("mysqlclusters").
+		Resource("mysql5clusters").
 		Name(name).
 		Body(&opts).
 		Do(ctx).
@@ -151,7 +151,7 @@ func (c *mySQLClusters) DeleteCollection(ctx context.Context, opts metav1.Delete
 	}
 	return c.client.Delete().
 		Namespace(c.ns).
-		Resource("mysqlclusters").
+		Resource("mysql5clusters").
 		VersionedParams(&listOpts, scheme.ParameterCodec).
 		Timeout(timeout).
 		Body(&opts).
@@ -164,7 +164,7 @@ func (c *mySQLClusters) Patch(ctx context.Context, name string, pt types.PatchTy
 	result = &v1.MySQLCluster{}
 	err = c.client.Patch(pt).
 		Namespace(c.ns).
-		Resource("mysqlclusters").
+		Resource("mysql5clusters").
 		Name(name).
 		SubResource(subresources...).
 		VersionedParams(&opts, scheme.ParameterCodec).

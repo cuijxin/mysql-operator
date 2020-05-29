@@ -65,7 +65,7 @@ func (c *mySQLBackupSchedules) Get(ctx context.Context, name string, options met
 	result = &v1.MySQLBackupSchedule{}
 	err = c.client.Get().
 		Namespace(c.ns).
-		Resource("mysqlbackupschedules").
+		Resource("mysql5backupschedules").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
 		Do(ctx).
@@ -82,7 +82,7 @@ func (c *mySQLBackupSchedules) List(ctx context.Context, opts metav1.ListOptions
 	result = &v1.MySQLBackupScheduleList{}
 	err = c.client.Get().
 		Namespace(c.ns).
-		Resource("mysqlbackupschedules").
+		Resource("mysql5backupschedules").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
 		Do(ctx).
@@ -99,7 +99,7 @@ func (c *mySQLBackupSchedules) Watch(ctx context.Context, opts metav1.ListOption
 	opts.Watch = true
 	return c.client.Get().
 		Namespace(c.ns).
-		Resource("mysqlbackupschedules").
+		Resource("mysql5backupschedules").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
 		Watch(ctx)
@@ -110,7 +110,7 @@ func (c *mySQLBackupSchedules) Create(ctx context.Context, mySQLBackupSchedule *
 	result = &v1.MySQLBackupSchedule{}
 	err = c.client.Post().
 		Namespace(c.ns).
-		Resource("mysqlbackupschedules").
+		Resource("mysql5backupschedules").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(mySQLBackupSchedule).
 		Do(ctx).
@@ -123,7 +123,7 @@ func (c *mySQLBackupSchedules) Update(ctx context.Context, mySQLBackupSchedule *
 	result = &v1.MySQLBackupSchedule{}
 	err = c.client.Put().
 		Namespace(c.ns).
-		Resource("mysqlbackupschedules").
+		Resource("mysql5backupschedules").
 		Name(mySQLBackupSchedule.Name).
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(mySQLBackupSchedule).
@@ -136,7 +136,7 @@ func (c *mySQLBackupSchedules) Update(ctx context.Context, mySQLBackupSchedule *
 func (c *mySQLBackupSchedules) Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error {
 	return c.client.Delete().
 		Namespace(c.ns).
-		Resource("mysqlbackupschedules").
+		Resource("mysql5backupschedules").
 		Name(name).
 		Body(&opts).
 		Do(ctx).
@@ -151,7 +151,7 @@ func (c *mySQLBackupSchedules) DeleteCollection(ctx context.Context, opts metav1
 	}
 	return c.client.Delete().
 		Namespace(c.ns).
-		Resource("mysqlbackupschedules").
+		Resource("mysql5backupschedules").
 		VersionedParams(&listOpts, scheme.ParameterCodec).
 		Timeout(timeout).
 		Body(&opts).
@@ -164,7 +164,7 @@ func (c *mySQLBackupSchedules) Patch(ctx context.Context, name string, pt types.
 	result = &v1.MySQLBackupSchedule{}
 	err = c.client.Patch(pt).
 		Namespace(c.ns).
-		Resource("mysqlbackupschedules").
+		Resource("mysql5backupschedules").
 		Name(name).
 		SubResource(subresources...).
 		VersionedParams(&opts, scheme.ParameterCodec).

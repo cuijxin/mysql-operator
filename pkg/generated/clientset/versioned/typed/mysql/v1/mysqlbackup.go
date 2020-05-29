@@ -65,7 +65,7 @@ func (c *mySQLBackups) Get(ctx context.Context, name string, options metav1.GetO
 	result = &v1.MySQLBackup{}
 	err = c.client.Get().
 		Namespace(c.ns).
-		Resource("mysqlbackups").
+		Resource("mysql5backups").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
 		Do(ctx).
@@ -82,7 +82,7 @@ func (c *mySQLBackups) List(ctx context.Context, opts metav1.ListOptions) (resul
 	result = &v1.MySQLBackupList{}
 	err = c.client.Get().
 		Namespace(c.ns).
-		Resource("mysqlbackups").
+		Resource("mysql5backups").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
 		Do(ctx).
@@ -99,7 +99,7 @@ func (c *mySQLBackups) Watch(ctx context.Context, opts metav1.ListOptions) (watc
 	opts.Watch = true
 	return c.client.Get().
 		Namespace(c.ns).
-		Resource("mysqlbackups").
+		Resource("mysql5backups").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
 		Watch(ctx)
@@ -110,7 +110,7 @@ func (c *mySQLBackups) Create(ctx context.Context, mySQLBackup *v1.MySQLBackup, 
 	result = &v1.MySQLBackup{}
 	err = c.client.Post().
 		Namespace(c.ns).
-		Resource("mysqlbackups").
+		Resource("mysql5backups").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(mySQLBackup).
 		Do(ctx).
@@ -123,7 +123,7 @@ func (c *mySQLBackups) Update(ctx context.Context, mySQLBackup *v1.MySQLBackup, 
 	result = &v1.MySQLBackup{}
 	err = c.client.Put().
 		Namespace(c.ns).
-		Resource("mysqlbackups").
+		Resource("mysql5backups").
 		Name(mySQLBackup.Name).
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(mySQLBackup).
@@ -136,7 +136,7 @@ func (c *mySQLBackups) Update(ctx context.Context, mySQLBackup *v1.MySQLBackup, 
 func (c *mySQLBackups) Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error {
 	return c.client.Delete().
 		Namespace(c.ns).
-		Resource("mysqlbackups").
+		Resource("mysql5backups").
 		Name(name).
 		Body(&opts).
 		Do(ctx).
@@ -151,7 +151,7 @@ func (c *mySQLBackups) DeleteCollection(ctx context.Context, opts metav1.DeleteO
 	}
 	return c.client.Delete().
 		Namespace(c.ns).
-		Resource("mysqlbackups").
+		Resource("mysql5backups").
 		VersionedParams(&listOpts, scheme.ParameterCodec).
 		Timeout(timeout).
 		Body(&opts).
@@ -164,7 +164,7 @@ func (c *mySQLBackups) Patch(ctx context.Context, name string, pt types.PatchTyp
 	result = &v1.MySQLBackup{}
 	err = c.client.Patch(pt).
 		Namespace(c.ns).
-		Resource("mysqlbackups").
+		Resource("mysql5backups").
 		Name(name).
 		SubResource(subresources...).
 		VersionedParams(&opts, scheme.ParameterCodec).

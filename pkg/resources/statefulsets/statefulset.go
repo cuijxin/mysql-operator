@@ -93,6 +93,13 @@ func replicationGroupSeedsEnvVar(replicationGroupSeeds string) v1.EnvVar {
 	}
 }
 
+func initDatabaseEnvVar(dbName string) v1.EnvVar {
+	return v1.EnvVar{
+		Name:  "MYSQL_DATABASE",
+		Value: dbName,
+	}
+}
+
 func multiMasterEnvVar(enabled bool) v1.EnvVar {
 	return v1.EnvVar{
 		Name:  "MYSQL_CLUSTER_MULTI_MASTER",
@@ -140,12 +147,21 @@ func getReplicationGroupSeeds(serviceName string, replicas int) string {
 	return strings.Join(seeds, ",")
 }
 
+func getInitDBName(cluster *api.MySQLCluster) string {
+	var name string
+	if cluster.Spec.InitDBName != nil {
+		name = *cluster.Spec.InitDBName
+	}
+
+	return name
+}
+
 // Builds the MySQL operator container for a cluster.
 // The 'mysqlImage' parameter is the image name of the mysql server to use with
 // no version information.. e.g. 'mysql/mysql-server'
 func mysqlServerContainer(cluster *api.MySQLCluster, mysqlServerImage string, rootPassword v1.EnvVar, serviceName string, replicas int) v1.Container {
 	replicationGroupSeeds := getReplicationGroupSeeds(serviceName, replicas)
-
+	dbName := getInitDBName(cluster)
 	args := []string{
 		"--server_id=$(expr 1000 + $index)",
 		// basic process setup options
@@ -227,6 +243,7 @@ func mysqlServerContainer(cluster *api.MySQLCluster, mysqlServerImage string, ro
 			serviceNameEnvVar(serviceName),
 			replicationGroupSeedsEnvVar(replicationGroupSeeds),
 			multiMasterEnvVar(cluster.Spec.MultiMaster),
+			initDatabaseEnvVar(dbName),
 			rootPassword,
 			v1.EnvVar{
 				Name:  "MYSQL_ROOT_HOST",
